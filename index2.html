@@ -571,6 +571,48 @@ body.dark-mode .btn-primary {
 body.dark-mode .btn-submit {
   background-color: #2ecc71;
 }
+/* ✅ تنسيقات خاصة بالطباعة */
+@media print {
+  body {
+    background-color: white !important;
+    color: black !important;
+  }
+
+  .app-header,
+  .btn,
+  .navigation-buttons,
+  .mobile-menu,
+  .desktop-menu,
+  #btn-dashboard,
+  #btn-deconnexion,
+  #btn-nouveau,
+  #toggle-theme,
+  #burger-dropdown,
+  #burger-btn {
+    display: none !important;
+  }
+
+  .form-section {
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  .section {
+    background: white !important;
+    color: black !important;
+  }
+
+  canvas {
+    display: none !important;
+  }
+
+  .signature-area::after {
+    content: "Signature présente dans la version numérique.";
+    color: gray;
+    font-style: italic;
+    font-size: 0.8rem;
+  }
+}
 
     </style>
     <!-- Firebase SDK -->
@@ -581,6 +623,13 @@ body.dark-mode .btn-submit {
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
 <script>
+  let operatorSignaturePad = null;
+  let supervisorSignaturePad = null;
+</script>
+
+<script>
+  
+  
   const firebaseConfig = {
     apiKey: "AIzaSyBYWRuK9PheGCZzr19735kgB1FC-V4zyio",
     authDomain: "sterilizationapp.firebaseapp.com",
@@ -594,9 +643,14 @@ body.dark-mode .btn-submit {
   // Initialiser Firebase
   firebase.initializeApp(firebaseConfig);
   const database = firebase.database();
+
+
+    
   
     window.addEventListener("DOMContentLoaded", function () {
       const loginBtn = document.getElementById("login-btn");
+      // ✅ تفعيل توقيع اليد بعد تحميل الصفحة
+
   
       loginBtn.addEventListener("click", function () {
         const id = document.getElementById("username").value;
@@ -623,9 +677,23 @@ dbRef.once("value").then((snapshot) => {
 
       });
     });
+  
+
 
   </script>
+  
+  
+  
+
+
+  
+  
+  
   <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+  <!-- jsPDF & html2canvas -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 
 </head>
 <body>
@@ -725,6 +793,11 @@ dbRef.once("value").then((snapshot) => {
                 <div class="section">
                     <div class="section-header">1. Réception</div>
                     <div class="section-content">
+                      <div class="form-group">
+                        <label for="photo">📸 Photo de l'appareil</label>
+                        <input type="file" id="photo" accept="image/*" class="form-control" />
+                      </div>
+                      
                         <div class="form-group">
                             <label for="arrival-time">Heure d'arrivée</label>
                             <input type="time" id="arrival-time" class="form-control" value="10:30">
@@ -970,6 +1043,10 @@ dbRef.once("value").then((snapshot) => {
                             <button id="save-button"
                             class="btn-submit">Enregistrer</button>
                           </div>
+                          <div class="form-group">
+                            <button class="btn btn-primary" onclick="exportToPDF()">🖨️ Télécharger PDF</button>
+                          </div>
+                          
                           
 
                           
@@ -1059,6 +1136,7 @@ dbRef.once("value").then((snapshot) => {
     </div>
 
     <script>
+        
         document.addEventListener('DOMContentLoaded', function() {
             const utilisateurConnecte = localStorage.getItem("utilisateurConnecte");
             if (utilisateurConnecte) {
@@ -1074,6 +1152,39 @@ dbRef.once("value").then((snapshot) => {
   alert("🔐 Connexion automatique en tant que: " + utilisateurConnecte);
 
 }
+// ✅ Boutons header
+document.getElementById("btn-deconnexion")?.addEventListener("click", function () {
+  localStorage.removeItem("utilisateurConnecte");
+  document.getElementById("app-container").classList.add("hidden");
+  document.getElementById("welcome-page").classList.remove("hidden");
+});
+
+document.getElementById("btn-nouveau")?.addEventListener("click", () => {
+  const confirmation = confirm("⚠️ Voulez-vous vraiment créer une nouvelle fiche ?");
+  if (!confirmation) return;
+  localStorage.removeItem("ficheEnEdition");
+  resetForm();
+  document.getElementById("btn-retour").click();
+  showToast("🆕 Nouvelle fiche réinitialisée !");
+});
+
+
+
+document.getElementById("toggle-theme")?.addEventListener("click", () => {
+  document.body.classList.toggle("dark-mode");
+  const isDark = document.body.classList.contains("dark-mode");
+  localStorage.setItem("theme", isDark ? "dark" : "light");
+});
+
+setTimeout(() => {
+  const canvases = document.querySelectorAll('.signature-canvas');
+  if (canvases.length >= 2) {
+    operatorSignaturePad = new SignaturePad(canvases[0]);
+    supervisorSignaturePad = new SignaturePad(canvases[1]);
+  }
+}, 500); // ننتظر نصف ثانية حتى تظهر العناصر
+
+
 
 
 });
@@ -1131,6 +1242,17 @@ dbRef.once("value").then((snapshot) => {
                     step.classList.toggle('active', index === currentSection);
                     step.classList.toggle('completed', index < currentSection);
                 });
+                // ✅ إعادة تهيئة التواقيع إذا وصلنا لقسم Validation
+if (currentSection === sections.length - 1) {
+  setTimeout(() => {
+    const canvases = document.querySelectorAll('.signature-canvas');
+    if (canvases.length >= 2) {
+      operatorSignaturePad = new SignaturePad(canvases[0]);
+      supervisorSignaturePad = new SignaturePad(canvases[1]);
+    }
+  }, 300);
+}
+
             }
             steps.forEach((step) => {
   step.addEventListener("click", () => {
@@ -1282,9 +1404,33 @@ supervisorSignature: supervisorSignaturePad.isEmpty() ? "Non disponible" : super
     ? firebase.database().ref('fiches/' + idEdition)
     : firebase.database().ref('fiches').push();
 
-  ref.set(data)
-    .then(() => {
-        showToast("✅ Données enregistrées avec succès !");
+    const file = document.getElementById("photo").files[0];
+if (file) {
+  const storageRef = firebase.storage().ref("photos/" + Date.now() + "_" + file.name);
+  storageRef.put(file).then(snapshot => {
+    snapshot.ref.getDownloadURL().then(url => {
+      data.photoUrl = url; // نربط الرابط بالبيانات
+      ref.set(data).then(() => {
+        showToast("✅ Données + photo enregistrées !");
+        localStorage.setItem("lastSaveTime", Date.now());
+        localStorage.removeItem("ficheEnEdition");
+        setTimeout(() => {
+          document.getElementById("btn-dashboard").click();
+        }, 1000);
+      });
+    });
+  });
+} else {
+  ref.set(data).then(() => {
+    showToast("✅ Données enregistrées sans photo !");
+    localStorage.setItem("lastSaveTime", Date.now());
+    localStorage.removeItem("ficheEnEdition");
+    setTimeout(() => {
+      document.getElementById("btn-dashboard").click();
+    }, 1000);
+  });
+}
+
         localStorage.setItem("lastSaveTime", Date.now());
 ficheEstSauvegardee = true;
 
@@ -1297,7 +1443,7 @@ ficheEstSauvegardee = true;
     .catch((error) => {
       console.error("❌ Erreur lors de l'enregistrement :", error);
     });
-});
+
 
   
 
@@ -1349,6 +1495,7 @@ ficheDiv.innerHTML = `
   <p><strong>Produit nettoyage:</strong> ${fiche.nettoyage?.product || '---'}</p>
   <p><strong>Opérateur:</strong> ${fiche.validation?.operatorName || '---'}</p>
   <p><strong>Phase:</strong> ${fiche.validation?.phase || fiche.phase || '---'}</p>
+  ${fiche.photoUrl ? `<img src="${fiche.photoUrl}" style="max-width: 100px; max-height: 100px; border-radius: 6px; margin-top: 10px;">` : ''}
   <button class="btn btn-primary" onclick="modifierFiche('${id}')">✏️ Modifier</button>
   <button class="btn btn-submit" style="background-color:#e74c3c;" onclick="supprimerFiche('${id}')">🗑️ Supprimer</button>
 `;
@@ -1454,33 +1601,47 @@ function modifierFiche(id) {
     });
 }
 
-// ✅ Retour du dashboard vers le formulaire
 document.getElementById('btn-retour').addEventListener('click', () => {
-  const dashboard = document.getElementById('dashboard-section');
-  dashboard.style.display = 'none';
+  // إخفاء الـ Dashboard
+  document.getElementById('dashboard-section').style.display = 'none';
 
-  const formSections = document.querySelectorAll('.form-section');
-  formSections.forEach((section, index) => {
+  // إظهار قسم النموذج الأول
+  const allSections = Array.from(document.querySelectorAll('.form-section')).filter(
+    section => section.id !== "dashboard-section"
+  );
+
+  allSections.forEach((section, index) => {
     section.style.display = index === 0 ? 'block' : 'none';
     section.classList.toggle('active', index === 0);
   });
 
+  // إعادة تهيئة المتغيرات
+  currentSection = 0;
+  sections.length = 0;
+  sections.push(...allSections);
 
+  // تحديث الخطوات
   const steps = document.querySelectorAll('.step');
   steps.forEach((step, index) => {
     step.classList.toggle('active', index === 0);
     step.classList.remove('completed');
   });
 
-  currentSection = 0;
-  const sectionElements = Array.from(document.querySelectorAll('.form-section')).filter(
-  section => section.id !== "dashboard-section"
-);
-sections.length = 0;
-sections.push(...sectionElements);
-
-updateSections();
+  // إعادة تفعيل التوقيع
+  setTimeout(() => {
+    updateSections();
+    const canvases = document.querySelectorAll('.signature-canvas');
+    if (canvases.length >= 2) {
+      operatorSignaturePad = new SignaturePad(canvases[0]);
+      supervisorSignaturePad = new SignaturePad(canvases[1]);
+    }
+  }, 300);
 });
+
+
+
+
+
 // ✅ Filtrage
 document.getElementById("btn-filtrer").addEventListener("click", () => {
   const dateFiltre = document.getElementById("filtre-date").value;
@@ -1697,53 +1858,8 @@ document.getElementById("fiches-mois").textContent =
   });
 }
 
-let operatorSignaturePad;
-let supervisorSignaturePad;
 
-document.addEventListener('DOMContentLoaded', function () {
-  // ✅ كود الوضع الليلي
-const toggleBtn = document.getElementById("toggle-theme");
-const body = document.body;
 
-// إذا كان الوضع الليلي مفعل مسبقًا
-if (localStorage.getItem("theme") === "dark") {
-  body.classList.add("dark-mode");
-}
-
-// التعامل مع الزر في الواجهة الرئيسية
-if (toggleBtn) {
-  toggleBtn.addEventListener("click", () => {
-    body.classList.toggle("dark-mode");
-    const isDark = body.classList.contains("dark-mode");
-    localStorage.setItem("theme", isDark ? "dark" : "light");
-  });
-}
-
-// التعامل مع الزر داخل القائمة الجانبية للهاتف
-const burgerThemeBtn = document.getElementById("burger-theme");
-if (burgerThemeBtn) {
-  burgerThemeBtn.addEventListener("click", () => {
-    toggleBtn?.click();
-  });
-}
-
-  const operatorCanvas = document.querySelectorAll('.signature-canvas')[0];
-  const supervisorCanvas = document.querySelectorAll('.signature-canvas')[1];
-
-  operatorSignaturePad = new SignaturePad(operatorCanvas);
-  supervisorSignaturePad = new SignaturePad(supervisorCanvas);
-  // ✅ استعادة المسودة عند تحميل الصفحة
-const draft = JSON.parse(localStorage.getItem("draftFiche"));
-if (draft) {
-  if (draft.date) document.getElementById('date').value = draft.date;
-  if (draft.arrivalTime) document.getElementById('arrival-time').value = draft.arrivalTime;
-  if (draft.service) document.getElementById('service').value = draft.service;
-  if (draft.transport) document.getElementById('transport').value = draft.transport;
-  if (draft.observations) document.getElementById('reception-observations').value = draft.observations;
-  console.log("📝 Brouillon chargé");
-}
-
-});
 
 function clearSignature(role) {
   if (role === 'operator') operatorSignaturePad.clear();
@@ -1911,6 +2027,102 @@ window.addEventListener("beforeunload", function (e) {
 <div id="toast" style="display: none; position: fixed; bottom: 20px; right: 20px; background-color: #2ecc71; color: white; padding: 12px 20px; border-radius: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-weight: 500; z-index: 9999;"></div>
 
 
-  
+<script>
+  function exportToPDF() {
+    const element = document.querySelector(".form-section.active"); // الجزء المعروض فقط
+    html2canvas(element).then(canvas => {
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save("fiche_sterilisation.pdf");
+    });
+  }
+  </script>
+  <script>
+  document.getElementById('btn-retour')?.addEventListener('click', () => {
+    document.getElementById('dashboard-section').style.display = 'none';
+
+    const allSections = Array.from(document.querySelectorAll('.form-section')).filter(
+      section => section.id !== "dashboard-section"
+    );
+
+    allSections.forEach((section, index) => {
+      section.style.display = index === 0 ? 'block' : 'none';
+      section.classList.toggle('active', index === 0);
+    });
+
+    currentSection = 0;
+    updateSections();
+
+    const steps = document.querySelectorAll('.step');
+    steps.forEach((step, index) => {
+      step.classList.toggle('active', index === 0);
+      step.classList.remove('completed');
+    });
+
+    setTimeout(() => {
+      const canvases = document.querySelectorAll('.signature-canvas');
+      if (canvases.length >= 2) {
+        operatorSignaturePad = new SignaturePad(canvases[0]);
+        supervisorSignaturePad = new SignaturePad(canvases[1]);
+      }
+    }, 300);
+  });
+</script>
+<script>
+  document.getElementById('btn-dashboard').addEventListener('click', () => {
+    const dashboard = document.getElementById('dashboard-section');
+    dashboard.style.display = 'block';
+    document.querySelectorAll('.form-section').forEach(section => section.style.display = 'none');
+
+    const dashboardList = document.getElementById('dashboard-list');
+    dashboardList.innerHTML = '<p>Chargement...</p>';
+
+    // ✅ تحميل البيانات من Firebase
+    firebase.database().ref('fiches').limitToLast(20).once('value')
+      .then(snapshot => {
+        const fiches = snapshot.val();
+        dashboardList.innerHTML = '';
+
+        if (!fiches) {
+          dashboardList.innerHTML = '<p>Aucune fiche trouvée.</p>';
+          return;
+        }
+
+        if (fiches) genererStatistiques(fiches); // عرض الإحصائيات
+
+        Object.entries(fiches).forEach(([id, fiche]) => {
+          const ficheDiv = document.createElement("div");
+          ficheDiv.style.border = '1px solid #ccc';
+          ficheDiv.style.padding = '10px';
+          ficheDiv.style.marginBottom = '10px';
+          ficheDiv.style.borderRadius = '6px';
+          ficheDiv.style.backgroundColor = '#f9f9f9';
+
+          ficheDiv.innerHTML = `
+            <p><strong>Date:</strong> ${fiche.date || '---'}</p>
+            <p><strong>Service:</strong> ${fiche.reception?.service || '---'}</p>
+            <p><strong>Transport:</strong> ${fiche.reception?.transport || '---'}</p>
+            <p><strong>Observation réception:</strong> ${fiche.reception?.observations || '---'}</p>
+            <p><strong>Produit nettoyage:</strong> ${fiche.nettoyage?.product || '---'}</p>
+            <p><strong>Opérateur:</strong> ${fiche.validation?.operatorName || '---'}</p>
+            <p><strong>Phase:</strong> ${fiche.validation?.phase || fiche.phase || '---'}</p>
+            ${fiche.photoUrl ? `<img src="${fiche.photoUrl}" style="max-width: 100px;">` : ''}
+            <button class="btn btn-primary" onclick="modifierFiche('${id}')">✏️ Modifier</button>
+            <button class="btn btn-submit" style="background-color:#e74c3c;" onclick="supprimerFiche('${id}')">🗑️ Supprimer</button>
+          `;
+          dashboardList.appendChild(ficheDiv);
+        });
+      })
+      .catch(error => {
+        dashboardList.innerHTML = '<p style="color:red;">Erreur lors du chargement des fiches.</p>';
+        console.error(error);
+      });
+  });
+</script>
+
 </body>
 </html>

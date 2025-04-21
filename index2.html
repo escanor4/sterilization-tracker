@@ -8,6 +8,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IFMSASO(OS201) - Traçabilité en Stérilisation</title>
     <style>
+      .stats-box {
+  margin-bottom: 20px;
+  padding: 12px;
+  border-radius: 8px;
+  background-color: #ecf0f1;
+}
+.stats-box p {
+  font-weight: bold;
+  margin: 6px 0;
+  color: #2c3e50;
+}
+
+/* 🌙 Mode sombre */
+body.dark-mode .stats-box {
+  background-color: #1e1e1e;
+}
+body.dark-mode .stats-box p {
+  color: #f5f5f5;
+}
+
         * {
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -639,6 +659,8 @@ dbRef.once("value").then((snapshot) => {
         <div class="app-header">
             <h1 class="app-title">IFMSASO(OS201)</h1>
             <p class="app-subtitle">Traçabilité en Stérilisation</p>
+          
+
             <!-- ✅ Boutons desktop -->
 <div class="desktop-menu">
   <button class="btn btn-primary" id="btn-dashboard">📊 Voir Dashboard</button>
@@ -1014,6 +1036,15 @@ dbRef.once("value").then((snapshot) => {
     </div>
     <div id="dashboard-charts" style="margin-top: 30px;">
         <h3>📊 Statistiques</h3>
+        <!-- ✅ Statistiques générales -->
+        <div class="stats-box">
+          <p id="pourcentage-signature">Pourcentage fiches signées: ...</p>
+          <p id="fiches-incompletes">Fiches incomplètes: ...</p>
+          <p id="fiches-semaine">Fiches cette semaine: ...</p>
+          <p id="fiches-mois">Fiches ce mois: ...</p>
+        </div>
+        
+
         <canvas id="serviceChart" style="max-height: 300px;"></canvas>
         <canvas id="phaseChart" style="max-height: 300px; margin-top: 40px;"></canvas>
         <canvas id="transportChart" style="max-height: 300px; margin-top: 40px;"></canvas>
@@ -1140,6 +1171,52 @@ dbRef.once("value").then((snapshot) => {
             
             // Bouton d'enregistrement
             document.querySelector('.btn-submit').addEventListener('click', function () {
+              // 🛑 Empêcher les enregistrements répétés dans moins de 60 secondes
+const now = Date.now();
+const lastSaveTime = localStorage.getItem("lastSaveTime");
+
+if (lastSaveTime && now - lastSaveTime < 60000) {
+  showModal("⏱️ Veuillez patienter au moins une minute avant d'enregistrer une nouvelle fiche.");
+  return;
+}
+
+              // ✅ Vérification des champs obligatoires (hors observations)
+const champsObligatoires = [
+  "date",
+  "arrival-time",
+  "service",
+  "transport",
+  "cleaner-name",
+  "operator-name",
+  "supervisor-name"
+];
+
+let champVide = false;
+
+champsObligatoires.forEach(id => {
+  const champ = document.getElementById(id);
+  if (champ && champ.value.trim() === "") {
+    champ.style.border = "2px solid red"; // surligner le champ vide
+    champVide = true;
+  } else if (champ) {
+    champ.style.border = ""; // retirer le surlignage si rempli
+  }
+});
+
+// ✅ Vérification des signatures
+const signatureVide = operatorSignaturePad.isEmpty() || supervisorSignaturePad.isEmpty();
+
+if (champVide) {
+  showModal("⚠️ Veuillez remplir tous les champs obligatoires.");
+  return;
+}
+
+if (signatureVide) {
+  showModal("✍️ Veuillez ajouter les deux signatures avant de valider.");
+  return;
+}
+
+
   const data = {
     date: document.getElementById('date')?.value || "",
     phase: document.getElementById('phase')?.value || "Réception",
@@ -1208,6 +1285,9 @@ supervisorSignature: supervisorSignaturePad.isEmpty() ? "Non disponible" : super
   ref.set(data)
     .then(() => {
         showToast("✅ Données enregistrées avec succès !");
+        localStorage.setItem("lastSaveTime", Date.now());
+ficheEstSauvegardee = true;
+
       localStorage.removeItem("ficheEnEdition"); // مسح وضع التعديل بعد الحفظ
       // ✅ Aller automatiquement au Dashboard après 1s
     setTimeout(() => {
@@ -1305,7 +1385,7 @@ function supprimerFiche(id) {
 }
 function modifierFiche(id) {
   const confirmer = confirm("⚠️ Êtes-vous sûr de vouloir modifier cette fiche ?");
-if (!confirmer) return;
+  if (!confirmer) return;
 
   const ficheRef = firebase.database().ref('fiches/' + id);
   ficheRef.once('value')
@@ -1321,19 +1401,59 @@ if (!confirmer) return;
         s.classList.toggle('active', i === 0);
       });
 
-
-
-      // ✅ Remplissez les données (exemple : réception uniquement)
+      // ✅ Réception
       document.getElementById('date').value = fiche.date || "";
       document.getElementById('arrival-time').value = fiche.reception?.arrivalTime || "";
       document.getElementById('service').value = fiche.reception?.service || "";
       document.getElementById('transport').value = fiche.reception?.transport || "";
       document.getElementById('reception-observations').value = fiche.reception?.observations || "";
 
+      // ✅ Tri
+      document.getElementById('sorting-observations').value = fiche.tri?.observations || "";
+      document.getElementById('quantity-complete').checked = fiche.tri?.quantity === "Complet";
+      document.getElementById('quantity-incomplete').checked = fiche.tri?.quantity === "Non complet";
+      document.getElementById('quality-ok').checked = fiche.tri?.quality === "Rien à signaler";
+      document.getElementById('quality-damaged').checked = fiche.tri?.quality === "Endommagé";
+      document.getElementById('quality-rusty').checked = fiche.tri?.quality === "Rouillé";
+
+      document.getElementById('protocol-manual').checked = fiche.tri?.protocol?.manual || false;
+      document.getElementById('protocol-washer').checked = fiche.tri?.protocol?.washer || false;
+      document.getElementById('protocol-ultrasound').checked = fiche.tri?.protocol?.ultrasound || false;
+
+      // ✅ Nettoyage
+      document.getElementById('cleaning-product').value = fiche.nettoyage?.product || "";
+      document.getElementById('cleaner-name').value = fiche.nettoyage?.cleanerName || "";
+      document.getElementById('cleaning-observations').value = fiche.nettoyage?.observations || "";
+
+      document.getElementById('temp-35-45').checked = fiche.nettoyage?.temperature === "35°~45°C";
+      document.getElementById('temp-40-60').checked = fiche.nettoyage?.temperature === "40°~60°C";
+      document.getElementById('temp-50-60').checked = fiche.nettoyage?.temperature === "50°~60°C";
+
+      document.getElementById('rinse-yes').checked = fiche.nettoyage?.rinse === "Oui";
+      document.getElementById('rinse-no').checked = fiche.nettoyage?.rinse === "Non";
+
+      document.getElementById('drying-auto').checked = fiche.nettoyage?.drying === "Automatique";
+      document.getElementById('drying-manual').checked = fiche.nettoyage?.drying === "Manuelle";
+      document.getElementById('drying-no').checked = fiche.nettoyage?.drying === "Non";
+
+      // ✅ Validation
+      document.getElementById('operator-name').value = fiche.validation?.operatorName || "";
+      document.getElementById('supervisor-name').value = fiche.validation?.supervisorName || "";
+      document.getElementById('phase').value = fiche.validation?.phase || "";
+
+      // ✅ Signatures (optionnel)
+      if (fiche.validation?.operatorSignature) {
+        operatorSignaturePad.fromDataURL(fiche.validation.operatorSignature);
+      }
+      if (fiche.validation?.supervisorSignature) {
+        supervisorSignaturePad.fromDataURL(fiche.validation.supervisorSignature);
+      }
+
       // 🟡 Enregistrer l'identifiant temporairement
       localStorage.setItem("ficheEnEdition", id);
     });
 }
+
 // ✅ Retour du dashboard vers le formulaire
 document.getElementById('btn-retour').addEventListener('click', () => {
   const dashboard = document.getElementById('dashboard-section');
@@ -1465,6 +1585,64 @@ document.getElementById("btn-nouveau").addEventListener("click", () => {
 
 function genererStatistiques(fiches) {
   console.log("📊 Démarrage du rendu des statistiques...");
+  // ✅ Calculer % des fiches signées
+let fichesSignees = 0;
+const total = Object.keys(fiches).length;
+
+Object.values(fiches).forEach(fiche => {
+  if (
+    fiche?.validation?.operatorSignature &&
+    fiche?.validation?.supervisorSignature
+  ) {
+    fichesSignees++;
+  }
+});
+
+const pourcentageSignées = total === 0
+  ? 0
+  : Math.round((fichesSignees / total) * 100);
+
+// ⬇️ Créer ou mettre à jour l'affichage (tu peux créer ce <p> dans le HTML)
+let statPourcentage = document.getElementById("pourcentage-signature");
+if (!statPourcentage) {
+  statPourcentage = document.createElement("p");
+  statPourcentage.id = "pourcentage-signature";
+  document.getElementById("dashboard-charts").prepend(statPourcentage);
+}
+statPourcentage.textContent = pourcentageSignées + "% fiches signées";
+let fichesIncompletes = 0;
+
+Object.values(fiches).forEach(fiche => {
+  if (
+    !fiche?.validation?.operatorSignature ||
+    !fiche?.validation?.supervisorSignature
+  ) {
+    fichesIncompletes++;
+  }
+});
+
+document.getElementById("fiches-incompletes").textContent =
+  fichesIncompletes + " fiches incomplètes";
+  let maintenant = Date.now();
+let semaine = 0;
+let mois = 0;
+
+Object.values(fiches).forEach(fiche => {
+  const dateFiche = new Date(fiche.date).getTime();
+  if (maintenant - dateFiche <= 7 * 24 * 60 * 60 * 1000) {
+    semaine++;
+  }
+  if (maintenant - dateFiche <= 30 * 24 * 60 * 60 * 1000) {
+    mois++;
+  }
+});
+
+document.getElementById("fiches-semaine").textContent =
+  semaine + " cette semaine";
+
+document.getElementById("fiches-mois").textContent =
+  mois + " ce mois";
+
 
   const services = {};
   const phases = {};
@@ -1673,7 +1851,26 @@ setInterval(() => {
     function closeModal() {
       document.getElementById("custom-modal").classList.add("hidden");
     }
-  
+    function verifierTri() {
+  const nonComplet = document.getElementById("quantity-incomplete").checked;
+  const rouille = document.getElementById("quality-rusty").checked;
+  const observationField = document.getElementById("sorting-observations");
+
+  if (nonComplet || rouille) {
+    observationField.setAttribute("required", "required");
+    observationField.placeholder = "⚠️ Veuillez préciser pourquoi.";
+    observationField.style.border = "2px solid red";
+  } else {
+    observationField.removeAttribute("required");
+    observationField.placeholder = "";
+    observationField.style.border = "";
+  }
+}
+
+// ✅ تشغيل المراقبة عند كل تغيير
+document.getElementById("quantity-incomplete").addEventListener("change", verifierTri);
+document.getElementById("quality-rusty").addEventListener("change", verifierTri);
+
   </script>
   
   
@@ -1701,10 +1898,19 @@ setInterval(() => {
     toast.style.display = "none";
   }, duration);
 }
+let ficheEstSauvegardee = false;
 
+window.addEventListener("beforeunload", function (e) {
+  if (!ficheEstSauvegardee) {
+    e.preventDefault();
+    e.returnValue = "";
+  }
+});
 </script>
 <!-- ✅ Toast message -->
 <div id="toast" style="display: none; position: fixed; bottom: 20px; right: 20px; background-color: #2ecc71; color: white; padding: 12px 20px; border-radius: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-weight: 500; z-index: 9999;"></div>
 
+
+  
 </body>
 </html>

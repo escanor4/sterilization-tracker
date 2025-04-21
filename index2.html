@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <link rel="manifest" href="manifest.webmanifest" />
+<meta name="theme-color" content="#2c3e50" />
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IFMSASO(OS201) - Traçabilité en Stérilisation</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .app-container {
+    max-width: 1200px;
+    width: 90%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+        .app-header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 16px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .app-title {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 500;
+        }
+        .app-subtitle {
+            margin: 5px 0 0;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        .app-content {
+            padding: 16px;
+        }
+        .form-header {
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .code-number {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+        .form-date {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .form-date label {
+            font-weight: 500;
+        }
+        .form-date input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .section {
+            background-color: white;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        .section-header {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 16px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .section-content {
+            padding: 16px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        .radio-group, .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 5px;
+        }
+        .radio-option, .checkbox-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        textarea.form-control {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+        .btn-primary {
+            background-color: #2c3e50;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #1a252f;
+        }
+        .btn-submit {
+            background-color: #27ae60;
+            color: white;
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            margin-top: 20px;
+        }
+        .btn-submit:hover {
+            background-color: #219653;
+        }
+        .tabs {
+            display: flex;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            cursor: pointer;
+            background-color: #f5f5f5;
+            transition: background-color 0.2s;
+        }
+        .tab.active {
+            background-color: #3498db;
+            color: white;
+            font-weight: 500;
+        }
+        .warning-banner {
+            background-color: #f39c12;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            text-align: center;
+        }
+        .signature-area {
+            border: 1px dashed #ddd;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 5px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        .step {
+            text-align: center;
+            flex: 1;
+            position: relative;
+        }
+        .step:not(:last-child):after {
+            content: "";
+            position: absolute;
+            top: 15px;
+            right: -50%;
+            width: 100%;
+            height: 2px;
+            background-color: #e0e0e0;
+            z-index: 1;
+        }
+        .step-number {
+            width: 30px;
+            height: 30px;
+            background-color: #e0e0e0;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 5px;
+            font-weight: bold;
+            color: #7f8c8d;
+            position: relative;
+            z-index: 2;
+        }
+        .step.active .step-number {
+            background-color: #3498db;
+            color: white;
+        }
+        .step.completed .step-number {
+            background-color: #27ae60;
+            color: white;
+        }
+        .step-label {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+        }
+        .step.active .step-label {
+            color: #3498db;
+            font-weight: 500;
+        }
+        .step.completed .step-label {
+            color: #27ae60;
+            font-weight: 500;
+        }
+        .form-section {
+    display: none;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.4s ease;
+}
+
+.form-section.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .nav-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .prev-button {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+        .next-button {
+            background-color: #3498db;
+            color: white;
+        }
+        /* Styles pour la page d'accueil */
+        .welcome-page {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            min-height: 100vh;
+            text-align: center;
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+        }
+        .logo-container {
+            margin-bottom: 40px;
+        }
+        .logo {
+            width: 150px;
+            height: 150px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .welcome-title {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .welcome-subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+        .login-form {
+            width: 100%;
+            max-width: 320px;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+        .login-form .form-group {
+            margin-bottom: 20px;
+        }
+        .login-form label {
+            color: #2c3e50;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        .login-form .form-control {
+            background-color: #f9f9f9;
+            border: 1px solid #e0e0e0;
+        }
+        .login-btn {
+            background-color: #27ae60;
+            color: white;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .login-btn:hover {
+            background-color: #219653;
+        }
+        .version-info {
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0.8;
+    font-size: 0.85rem;
+    color: white;
+    z-index: 1000;
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 4px 12px;
+    border-radius: 6px;
+}
+
+        /* Pour passer de la page d'accueil à l'application */
+        
+        @media (min-width: 768px) {
+    .form-group {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .form-group label {
+        flex: 1;
+        margin-right: 10px;
+    }
+
+    .form-control {
+        flex: 2;
+    }
+
+    .checkbox-group, .radio-group {
+        justify-content: start;
+    }
+
+    .navigation-buttons {
+        justify-content: flex-end;
+    }
+}
+.hidden {
+    display: none !important;
+}@media (max-width: 600px) {
+  .form-group {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .form-group label {
+    margin-bottom: 5px;
+  }
+
+  .radio-group, .checkbox-group {
+    flex-direction: column !important;
+    gap: 5px;
+  }
+
+  .login-form, .form-section, .section {
+    padding: 15px !important;
+  }
+
+  .navigation-buttons {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .btn, .btn-submit {
+    width: 100% !important;
+  }
+
+  .step-indicator {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .step:after {
+    display: none !important;
+  }
+
+  .step-number {
+    margin-bottom: 5px;
+  }
+
+  #dashboard-list > div {
+    font-size: 0.9rem;
+  }
+
+  .app-header {
+    text-align: center;
+  }
+
+  .welcome-title {
+    font-size: 2rem;
+  }
+
+  .welcome-subtitle {
+    font-size: 1rem;
+  }
+
+  .section-header {
+    font-size: 1rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .signature-area {
+    flex-direction: column;
+    height: auto;
+  }
+}
+
+/* 🌙 Dark Mode Styles */
+body.dark-mode {
+  background-color: #121212;
+  color: #f5f5f5;
+}
+body.dark-mode label {
+  color: #f5f5f5 !important;
+}
+/* 🌙 تحسين النصوص في الوضع الليلي */
+body.dark-mode label,
+body.dark-mode strong,
+body.dark-mode p,
+body.dark-mode .section-content,
+body.dark-mode .form-title,
+body.dark-mode .code-number,
+body.dark-mode select.form-control option {
+  color: #f5f5f5 !important;
+}
+
+/* خلفية خفيفة داخل الفيشة */
+body.dark-mode .section-content {
+  background-color: #1a1a1a;
+}
+
+/* نص التوست toast في حال استعملت الوضع الليلي */
+body.dark-mode #toast {
+  background-color: #27ae60;
+  color: white;
+}
+
+/* تعديل الأزرار بداخل الفيشة */
+body.dark-mode .btn-submit {
+  background-color: #2ecc71;
+}
+
+body.dark-mode .btn-submit:hover {
+  background-color: #27ae60;
+}
+
+/* تغيير خلفية الـ select عند فتح القائمة */
+body.dark-mode select.form-control {
+  background-color: #2c2c2c;
+}
+
+
+
+body.dark-mode .section,
+body.dark-mode .login-form,
+body.dark-mode .form-control,
+body.dark-mode .form-section,
+body.dark-mode .signature-area {
+  background-color: #1e1e1e !important;
+  color: #f5f5f5 !important;
+  border-color: #333 !important;
+}
+
+body.dark-mode .section-header {
+  background-color: #222 !important;
+  color: #ffffff !important;
+}
+
+body.dark-mode .app-header {
+  background-color: #000000;
+}
+
+body.dark-mode .form-control::placeholder {
+  color: #ccc;
+}
+
+body.dark-mode .step-number {
+  background-color: #444;
+  color: #fff;
+}
+
+body.dark-mode .btn {
+  background-color: #333;
+  color: white;
+}
+
+body.dark-mode .btn-primary {
+  background-color: #444 !important;
+}
+
+body.dark-mode .btn-submit {
+  background-color: #2ecc71;
+}
+
+    </style>
+    <!-- Firebase SDK -->
+     <!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBYWRuK9PheGCZzr19735kgB1FC-V4zyio",
+    authDomain: "sterilizationapp.firebaseapp.com",
+    projectId: "sterilizationapp",
+    storageBucket: "sterilizationapp.appspot.com",
+    messagingSenderId: "832991576655",
+    appId: "1:832991576655:web:457b8a44b5ea864e4b603a",
+    databaseURL: "https://sterilizationapp-default-rtdb.firebaseio.com"
+  };
+
+  // Initialiser Firebase
+  firebase.initializeApp(firebaseConfig);
+  const database = firebase.database();
+  
+    window.addEventListener("DOMContentLoaded", function () {
+      const loginBtn = document.getElementById("login-btn");
+  
+      loginBtn.addEventListener("click", function () {
+        const id = document.getElementById("username").value;
+        const mdp = document.getElementById("password").value;
+  
+        const dbRef = firebase.database().ref("utilisateurs/" + id);
+dbRef.once("value").then((snapshot) => {
+  if (snapshot.exists()) {
+    const motdepasse = snapshot.val().motdepasse;
+    if (motdepasse === mdp) {
+      document.getElementById("message").innerText = "Connexion réussie !";
+      document.getElementById("welcome-page").classList.add("hidden");
+      document.getElementById("app-container").classList.remove("hidden");
+      localStorage.setItem("utilisateurConnecte", id);
+    } else {
+      document.getElementById("message").innerText = "Mot de passe incorrect !";
+    }
+  } else {
+    document.getElementById("message").innerText = "Identifiant introuvable !";
+  }
+}).catch((error) => {
+  document.getElementById("message").innerText = "Erreur: " + error.message;
+});
+
+      });
+    });
+
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+
+</head>
+<body>
+    <!-- Page d'accueil -->
+    <div class="welcome-page" id="welcome-page">
+        <div class="logo-container">
+            <div class="logo">OS201</div>
+        </div>
+        <h1 class="welcome-title">IFMSASO</h1>
+        <p class="welcome-subtitle">Application de Traçabilité en Stérilisation</p>
+        
+        <div class="login-form">
+            <div class="form-group">
+                <label for="username">Identifiant</label>
+                <input type="text" id="username" class="form-control" placeholder="Entrez votre identifiant">
+            </div>
+            <div class="form-group">
+                <label for="password">Mot de passe</label>
+                <input type="password" id="password" class="form-control" placeholder="Entrez votre mot de passe">
+            </div>
+            <button class="login-btn" id="login-btn">Se connecter</button>
+            <p id="message" style="color:red; text-align:center;"></p>
+
+        </div>
+        
+        <div class="version-info">Version 2.0.0 | Centre de simulation IFMSASO</div>
+    </div>
+
+    <!-- Application principale -->
+    <div class="app-container hidden" id="app-container">
+        <div class="app-header">
+            <h1 class="app-title">IFMSASO(OS201)</h1>
+            <p class="app-subtitle">Traçabilité en Stérilisation</p>
+            <!-- ✅ Boutons desktop -->
+<div class="desktop-menu">
+  <button class="btn btn-primary" id="btn-dashboard">📊 Voir Dashboard</button>
+  <button class="btn btn-primary" id="btn-deconnexion">🔓 Déconnexion</button>
+  <button class="btn btn-primary" id="btn-nouveau">🆕 Nouvelle fiche</button>
+  <button class="btn btn-primary" id="toggle-theme">🌓 Mode Sombre</button>
+</div>
+
+<!-- ✅ Burger Menu mobile -->
+<div class="mobile-menu">
+  <button class="btn btn-primary" id="burger-btn">☰ Menu</button>
+  <div id="burger-dropdown" class="hidden" style="position: absolute; background: white; top: 60px; right: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-radius: 6px; padding: 10px;">
+    <button class="btn" id="burger-dashboard">📊 Voir Dashboard</button><br>
+    <button class="btn" id="burger-nouveau">🆕 Nouvelle fiche</button><br>
+    <button class="btn" id="burger-deconnexion">🔓 Déconnexion</button>
+    <button class="btn" id="burger-theme">🌓 Mode Sombre</button>
+
+  </div>
+</div>
+
+
+
+        </div>
+        
+        <div class="app-content">
+            <div class="form-header">
+                <span class="code-number">Code fiche: TR150424-8678</span>
+                <span class="form-title">Traçabilité de la phase de réception, tri et nettoyage</span>
+            </div>
+            
+            <div class="form-date">
+                <label for="date">Date:</label>
+                <input type="date" id="date" name="date" value="2025-04-16">
+            </div>
+
+            <div class="step-indicator">
+              <div class="step active" data-index="0">
+                <div class="step-number">1</div>
+                <div class="step-label">Réception</div>
+              </div>
+              <div class="step" data-index="1">
+                <div class="step-number">2</div>
+                <div class="step-label">Tri</div>
+              </div>
+              <div class="step" data-index="2">
+                <div class="step-number">3</div>
+                <div class="step-label">Nettoyage</div>
+              </div>
+              <div class="step" data-index="3">
+                <div class="step-number">4</div>
+                <div class="step-label">Validation</div>
+              </div>
+              
+            </div>
+
+            <div class="warning-banner">
+                EPI obligatoires: Lunette de protection, callot, masque, surblouse, surchaussure, gants avec manchettes langue
+            </div>
+            
+            <!-- Section 1: Réception -->
+            <div class="form-section active" id="section-reception">
+                <div class="section">
+                    <div class="section-header">1. Réception</div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="arrival-time">Heure d'arrivée</label>
+                            <input type="time" id="arrival-time" class="form-control" value="10:30">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="service">Service utilisateur</label>
+                            <select id="service" class="form-control">
+                                <option value="">Sélectionner...</option>
+                                <option value="chirurgie" selected>Chirurgie</option>
+                                <option value="urgences">Urgences</option>
+                                <option value="bloc-op">Bloc opératoire</option>
+                                <option value="consult">Consultations</option>
+                                <option value="autre">Autre</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="transport">Type de transport</label>
+                            <select id="transport" class="form-control">
+                                <option value="">Sélectionner...</option>
+                                <option value="chariot" selected>Chariot</option>
+                                <option value="monte-charge">Monte-charge</option>
+                                <option value="pneumatique">Transport pneumatique</option>
+                                <option value="manuel">Manuel</option>
+                                <option value="autre">Autre</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Risque particulier</label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="risk-prion" name="risk">
+                                    <label for="risk-prion">Prion</label>
+                                </div>
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="risk-other" name="risk">
+                                    <label for="risk-other">Autre</label>
+                                </div>
+                            </div>
+                            <input type="text" class="form-control" placeholder="Préciser autre risque" style="margin-top: 10px; display: none;">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Prétraitement</label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" id="pretreatment-done" name="pretreatment" checked>
+                                    <label for="pretreatment-done">Fait</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="pretreatment-not-done" name="pretreatment">
+                                    <label for="pretreatment-not-done">Non-fait</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="reception-observations">Observations</label>
+                            <textarea id="reception-observations" class="form-control" placeholder="Saisir vos observations..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="navigation-buttons">
+                    <button class="nav-button prev-button" disabled>Précédent</button>
+                    <button class="nav-button next-button">Suivant</button>
+                </div>
+            </div>
+            
+            <!-- Section 2: Tri -->
+            <div class="form-section" id="section-tri">
+                <div class="section">
+                    <div class="section-header">2. Tri</div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label>Protocole de nettoyage</label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="protocol-manual" name="protocol" checked>
+                                    <label for="protocol-manual">Manuelle</label>
+                                </div>
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="protocol-washer" name="protocol">
+                                    <label for="protocol-washer">Laveur-désinfecteur</label>
+                                </div>
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="protocol-ultrasound" name="protocol">
+                                    <label for="protocol-ultrasound">Ultrasons</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Vérification de la quantité</label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" id="quantity-complete" name="quantity" checked>
+                                    <label for="quantity-complete">Complet</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="quantity-incomplete" name="quantity">
+                                    <label for="quantity-incomplete">Non complet</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Qualité</label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" id="quality-ok" name="quality" checked>
+                                    <label for="quality-ok">Rien à signaler</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="quality-damaged" name="quality">
+                                    <label for="quality-damaged">Endommagé</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="quality-rusty" name="quality">
+                                    <label for="quality-rusty">Rouillé</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="sorting-observations">Observations</label>
+                            <textarea id="sorting-observations" class="form-control" placeholder="Saisir vos observations..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="navigation-buttons">
+                    <button class="nav-button prev-button">Précédent</button>
+                    <button class="nav-button next-button">Suivant</button>
+                </div>
+            </div>
+            
+            <!-- Section 3: Nettoyage -->
+            <div class="form-section" id="section-nettoyage">
+                <div class="section">
+                    <div class="section-header">3. Nettoyage</div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="cleaning-product">Produit de nettoyage utilisé</label>
+                            <select id="cleaning-product" class="form-control">
+                                <option value="">Sélectionner...</option>
+                                <option value="product1" selected>Hexanios G+R</option>
+                                <option value="product2">Aniosyme DD1</option>
+                                <option value="product3">Aniosyme XL3</option>
+                                <option value="product4">Autre</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Température</label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" id="temp-35-45" name="temperature" checked>
+                                    <label for="temp-35-45">35°~45°C</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="temp-40-60" name="temperature">
+                                    <label for="temp-40-60">40°~60°C</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="temp-50-60" name="temperature">
+                                    <label for="temp-50-60">50°~60°C</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Rinçage</label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" id="rinse-yes" name="rinse" checked>
+                                    <label for="rinse-yes">Oui</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="rinse-no" name="rinse">
+                                    <label for="rinse-no">Non</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Séchage</label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" id="drying-auto" name="drying" checked>
+                                    <label for="drying-auto">Oui - Automatique</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="drying-manual" name="drying">
+                                    <label for="drying-manual">Oui - Manuelle</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="drying-no" name="drying">
+                                    <label for="drying-no">Non</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="cleaner-name">Nom</label>
+                            <input type="text" id="cleaner-name" class="form-control" placeholder="Nom de l'opérateur">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="cleaning-observations">Observations</label>
+                            <textarea id="cleaning-observations" class="form-control" placeholder="Saisir vos observations..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="navigation-buttons">
+                    <button class="nav-button prev-button">Précédent</button>
+                    <button class="nav-button next-button">Suivant</button>
+                </div>
+            </div>
+            
+            <!-- Section 4: Validation -->
+            <div class="form-section" id="section-validation">
+                <div class="section">
+                    <div class="section-header">4. Validation</div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="operator-name">Nom de l'opérateur</label>
+                            <input type="text" id="operator-name" class="form-control" placeholder="Nom complet">
+                        </div>
+                        <div class="form-group">
+                            <label for="phase">Phase :</label>
+                            <select id="phase" class="form-control">
+                              <option value="Réception">Réception</option>
+                              <option value="Lavage">Lavage</option>
+                              <option value="Stérilisation">Stérilisation</option>
+                              <option value="Stockage">Stockage</option>
+                            </select>
+                          </div>
+                          <div class="form-group">
+                            <button id="save-button"
+                            class="btn-submit">Enregistrer</button>
+                          </div>
+                          
+
+                          
+                        
+                        <div class="form-group">
+                            <label>Signature de l'opérateur</label>
+                            <div class="signature-area">
+                                <canvas class="signature-canvas" width="300" height="100" style="background:white; border-radius:4px;"></canvas>
+                              </div>
+                              <button class="btn" type="button" onclick="clearSignature('operator')">Effacer</button>
+                              
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="supervisor-name">Nom du responsable</label>
+                            <input type="text" id="supervisor-name" class="form-control" placeholder="Nom complet">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Signature du responsable</label>
+                            <div class="signature-area">
+                                <canvas class="signature-canvas" width="300" height="100" style="background:white; border-radius:4px;"></canvas>
+                              </div>
+                              <button class="btn" type="button" onclick="clearSignature('supervisor')">Effacer</button>
+
+                              
+                        </div>
+                        
+                        <div class="form-group">
+                            <p style="font-weight: 500; color: #e74c3c;">Remarque: Tout dispositif non conforme doit être isolé et signalé immédiatement au responsable du service</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="navigation-buttons">
+                    <button class="nav-button prev-button">Précédent</button>
+                    <button class="btn btn-submit">Enregistrer</button>
+                </div>
+            </div>
+            <!-- Section 5: Dashboard -->
+<div class="section" id="dashboard-section" style="display: none;">
+    <div class="section-header">📋 Tableau de Suivi des Fiches</div>
+    <div class="section-content">
+        <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+            <input type="date" id="filtre-date" class="form-control" />
+            <select id="filtre-service" class="form-control">
+              <option value="">Tous les services</option>
+              <option value="chirurgie">Chirurgie</option>
+              <option value="urgences">Urgences</option>
+              <option value="bloc-op">Bloc opératoire</option>
+              <option value="consult">Consultations</option>
+              <option value="autre">Autre</option>
+            </select>
+            <button class="btn btn-primary" id="btn-filtrer">🔍 Appliquer le filtre</button>
+          </div>
+          
+        <div id="dashboard-list">
+        <p>Chargement des données...</p>
+      </div>
+      <button class="btn btn-primary" id="btn-retour" style="margin-top: 20px;">⬅️ Retour au formulaire</button>
+      <button class="btn btn-submit" id="btn-export" style="margin-top: 10px;">📥 Exporter vers Excel</button>
+
+
+    </div>
+    <div id="dashboard-charts" style="margin-top: 30px;">
+        <h3>📊 Statistiques</h3>
+        <canvas id="serviceChart" style="max-height: 300px;"></canvas>
+        <canvas id="phaseChart" style="max-height: 300px; margin-top: 40px;"></canvas>
+        <canvas id="transportChart" style="max-height: 300px; margin-top: 40px;"></canvas>
+<canvas id="produitChart" style="max-height: 300px; margin-top: 40px;"></canvas>
+<canvas id="operateurChart" style="max-height: 300px; margin-top: 40px;"></canvas>
+
+      </div>
+      
+  </div>
+  
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const utilisateurConnecte = localStorage.getItem("utilisateurConnecte");
+            if (utilisateurConnecte) {
+  document.getElementById('welcome-page').classList.add('hidden');
+  document.getElementById('app-container').classList.remove('hidden');
+
+  
+
+
+  // ✅ Commencer depuis le début du formulaire
+  currentSection = 0;
+  updateSections();
+  alert("🔐 Connexion automatique en tant que: " + utilisateurConnecte);
+
+}
+
+
+});
+
+            // Connexion à l'application
+            const loginBtn = document.getElementById('login-btn');
+            const welcomePage = document.getElementById('welcome-page');
+            const appContainer = document.getElementById('app-container');
+            
+            loginBtn.addEventListener('click', function () {
+  const identifiant = document.getElementById('username').value;
+  const motdepasse = document.getElementById('password').value;
+
+  const dbRef = firebase.database().ref("utilisateurs/" + identifiant);
+
+  dbRef.once('value').then((snapshot) => {
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      if (data.motdepasse === motdepasse) {
+        // Connexion réussie
+        localStorage.setItem("utilisateurConnecte", identifiant); // 🔐 Enregistrer la session
+        welcomePage.classList.add("hidden");
+        appContainer.classList.remove("hidden");
+      } else {
+        showModal("❌ Mot de passe incorrect !");
+      }
+    } else {
+      alert("Identifiant introuvable !");
+    }
+  }).catch((error) => {
+    console.error("Erreur lors de la connexion:", error);
+    alert("Erreur lors de la connexion.");
+  });
+});
+
+
+            
+            // Navigation entre sections
+            const sections = Array.from(document.querySelectorAll('.form-section')).filter(
+  section => section.id !== "dashboard-section"
+);
+
+            const steps = document.querySelectorAll('.step');
+            const nextButtons = document.querySelectorAll('.next-button');
+            const prevButtons = document.querySelectorAll('.prev-button');
+            
+            let currentSection = 0;
+            
+            function updateSections() {
+                sections.forEach((section, index) => {
+                    section.classList.toggle('active', index === currentSection);
+                });
+                
+                steps.forEach((step, index) => {
+                    step.classList.toggle('active', index === currentSection);
+                    step.classList.toggle('completed', index < currentSection);
+                });
+            }
+            steps.forEach((step) => {
+  step.addEventListener("click", () => {
+    const index = parseInt(step.getAttribute("data-index"));
+    if (!isNaN(index)) {
+      currentSection = index;
+      updateSections();
+    }
+  });
+});
+
+            
+            nextButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    if (currentSection < sections.length - 1) {
+                        currentSection++;
+                        updateSections();
+                    }
+                });
+            });
+            
+            prevButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    if (currentSection > 0) {
+                        currentSection--;
+                        updateSections();
+                    }
+                });
+            });
+            
+            // Afficher le champ "autre risque" quand la case est cochée
+            const riskOtherCheckbox = document.getElementById('risk-other');
+            const otherRiskField = riskOtherCheckbox.closest('.form-group').querySelector('input[type="text"]');
+            
+            riskOtherCheckbox.addEventListener('change', function() {
+                otherRiskField.style.display = this.checked ? 'block' : 'none';
+            });
+            
+            // Bouton d'enregistrement
+            document.querySelector('.btn-submit').addEventListener('click', function () {
+  const data = {
+    date: document.getElementById('date')?.value || "",
+    phase: document.getElementById('phase')?.value || "Réception",
+
+    reception: {
+      arrivalTime: document.getElementById('arrival-time')?.value || "",
+      service: document.getElementById('service')?.value || "",
+      transport: document.getElementById('transport')?.value || "",
+      risks: {
+        prion: document.getElementById('risk-prion')?.checked || false,
+        autre: document.getElementById('risk-other')?.checked || false,
+        autreText: document.querySelector('#risk-other')?.closest('.form-group').querySelector('input[type="text"]')?.value || ""
+      },
+      pretreatment: document.getElementById('pretreatment-done')?.checked ? "Fait" : "Non-fait",
+      observations: document.getElementById('reception-observations')?.value || ""
+    },
+
+    tri: {
+      protocol: {
+        manual: document.getElementById('protocol-manual')?.checked || false,
+        washer: document.getElementById('protocol-washer')?.checked || false,
+        ultrasound: document.getElementById('protocol-ultrasound')?.checked || false,
+      },
+      quantity: document.getElementById('quantity-complete')?.checked ? "Complet" : "Non complet",
+      quality: document.getElementById('quality-ok')?.checked
+        ? "Rien à signaler"
+        : document.getElementById('quality-damaged')?.checked
+          ? "Endommagé"
+          : "Rouillé",
+      observations: document.getElementById('sorting-observations')?.value || ""
+    },
+
+    nettoyage: {
+      product: document.getElementById('cleaning-product')?.value || "",
+      temperature:
+        document.getElementById('temp-35-45')?.checked ? "35°~45°C" :
+        document.getElementById('temp-40-60')?.checked ? "40°~60°C" :
+        "50°~60°C",
+      rinse: document.getElementById('rinse-yes')?.checked ? "Oui" : "Non",
+      drying:
+        document.getElementById('drying-auto')?.checked ? "Automatique" :
+        document.getElementById('drying-manual')?.checked ? "Manuelle" :
+        "Non",
+      cleanerName: document.getElementById('cleaner-name')?.value || "",
+      observations: document.getElementById('cleaning-observations')?.value || ""
+    },
+
+    validation: {
+      operatorName: document.getElementById('operator-name')?.value || "",
+      supervisorName: document.getElementById('supervisor-name')?.value || "",
+      phase: document.getElementById('phase')?.value || "",
+      operatorSignature: operatorSignaturePad.isEmpty() ? "Non disponible" : operatorSignaturePad.toDataURL(),
+supervisorSignature: supervisorSignaturePad.isEmpty() ? "Non disponible" : supervisorSignaturePad.toDataURL()
+
+    },
+
+    dateSaved: new Date().toISOString()
+  };
+
+  // ✅ تحقق هل نحن في وضع التعديل أو إضافة جديدة
+  const idEdition = localStorage.getItem("ficheEnEdition");
+  const ref = idEdition
+    ? firebase.database().ref('fiches/' + idEdition)
+    : firebase.database().ref('fiches').push();
+
+  ref.set(data)
+    .then(() => {
+        showToast("✅ Données enregistrées avec succès !");
+      localStorage.removeItem("ficheEnEdition"); // مسح وضع التعديل بعد الحفظ
+      // ✅ Aller automatiquement au Dashboard après 1s
+    setTimeout(() => {
+      document.getElementById("btn-dashboard").click();
+    }, 1000);
+    })
+    .catch((error) => {
+      console.error("❌ Erreur lors de l'enregistrement :", error);
+    });
+});
+
+  
+
+
+document.getElementById('btn-dashboard').addEventListener('click', () => {
+  const dashboard = document.getElementById('dashboard-section');
+  dashboard.style.display = 'block';
+  document.querySelectorAll('.form-section').forEach(section => section.style.display = 'none');
+
+  const dashboardList = document.getElementById('dashboard-list');
+  dashboardList.innerHTML = '<p>Chargement...</p>';
+  showLoader(true);
+
+
+  // ✅ تحميل البيانات من Firebase
+  firebase.database().ref('fiches').limitToLast(20).once('value')
+    .then(snapshot => {
+      const fiches = snapshot.val();
+      dashboardList.innerHTML = '';
+
+      if (!fiches) {
+        dashboardList.innerHTML = '<p>Aucune fiche trouvée.</p>';
+        showLoader(false);
+        return;
+      }
+      if (fiches) genererStatistiques(fiches);
+
+      Object.entries(fiches).forEach(([id, fiche]) => {
+        const ficheDiv = document.createElement("div");
+
+// ✅ تحديد إذا كنا في الوضع الليلي
+const isDarkMode = document.body.classList.contains('dark-mode');
+
+// ✅ تنسيقات ديناميكية حسب الوضع
+ficheDiv.style.border = '1px solid ' + (isDarkMode ? '#444' : '#ccc');
+ficheDiv.style.padding = '10px';
+ficheDiv.style.marginBottom = '10px';
+ficheDiv.style.borderRadius = '6px';
+ficheDiv.style.backgroundColor = isDarkMode ? '#1e1e1e' : '#f9f9f9';
+ficheDiv.style.color = isDarkMode ? '#f5f5f5' : '#2c3e50';
+
+
+
+ficheDiv.innerHTML = `
+  <p><strong>Date:</strong> ${fiche.date || '---'}</p>
+  <p><strong>Service:</strong> ${fiche.reception?.service || '---'}</p>
+  <p><strong>Transport:</strong> ${fiche.reception?.transport || '---'}</p>
+  <p><strong>Observation réception:</strong> ${fiche.reception?.observations || '---'}</p>
+  <p><strong>Produit nettoyage:</strong> ${fiche.nettoyage?.product || '---'}</p>
+  <p><strong>Opérateur:</strong> ${fiche.validation?.operatorName || '---'}</p>
+  <p><strong>Phase:</strong> ${fiche.validation?.phase || fiche.phase || '---'}</p>
+  <button class="btn btn-primary" onclick="modifierFiche('${id}')">✏️ Modifier</button>
+  <button class="btn btn-submit" style="background-color:#e74c3c;" onclick="supprimerFiche('${id}')">🗑️ Supprimer</button>
+`;
+
+        dashboardList.appendChild(ficheDiv);
+      });
+      showLoader(false);
+      
+    })
+    .catch(error => {
+      console.error('Erreur lors du chargement:', error);
+      dashboardList.innerHTML = '<p style="color:red;">Erreur lors du chargement des fiches.</p>';
+
+      showLoader(false);
+
+      
+    });
+    
+
+});
+
+function supprimerFiche(id) {
+  const confirmation = confirm("⚠️ Êtes-vous sûr de vouloir supprimer cette fiche ?");
+  if (confirmation) {
+    firebase.database().ref('fiches/' + id).remove()
+      .then(() => {
+        showToast("✅ Fiche supprimée avec succès !");
+
+      })
+      .catch((error) => {
+        alert("❌ Erreur lors de la suppression: " + error.message);
+      });
+  }
+}
+function modifierFiche(id) {
+  const confirmer = confirm("⚠️ Êtes-vous sûr de vouloir modifier cette fiche ?");
+if (!confirmer) return;
+
+  const ficheRef = firebase.database().ref('fiches/' + id);
+  ficheRef.once('value')
+    .then(snapshot => {
+      const fiche = snapshot.val();
+      if (!fiche) return;
+
+      // ✅ Afficher le formulaire
+      document.getElementById('dashboard-section').style.display = 'none';
+      const sections = document.querySelectorAll('.form-section');
+      sections.forEach((s, i) => {
+        s.style.display = i === 0 ? 'block' : 'none';
+        s.classList.toggle('active', i === 0);
+      });
+
+
+
+      // ✅ Remplissez les données (exemple : réception uniquement)
+      document.getElementById('date').value = fiche.date || "";
+      document.getElementById('arrival-time').value = fiche.reception?.arrivalTime || "";
+      document.getElementById('service').value = fiche.reception?.service || "";
+      document.getElementById('transport').value = fiche.reception?.transport || "";
+      document.getElementById('reception-observations').value = fiche.reception?.observations || "";
+
+      // 🟡 Enregistrer l'identifiant temporairement
+      localStorage.setItem("ficheEnEdition", id);
+    });
+}
+// ✅ Retour du dashboard vers le formulaire
+document.getElementById('btn-retour').addEventListener('click', () => {
+  const dashboard = document.getElementById('dashboard-section');
+  dashboard.style.display = 'none';
+
+  const formSections = document.querySelectorAll('.form-section');
+  formSections.forEach((section, index) => {
+    section.style.display = index === 0 ? 'block' : 'none';
+    section.classList.toggle('active', index === 0);
+  });
+
+
+  const steps = document.querySelectorAll('.step');
+  steps.forEach((step, index) => {
+    step.classList.toggle('active', index === 0);
+    step.classList.remove('completed');
+  });
+
+  currentSection = 0;
+  const sectionElements = Array.from(document.querySelectorAll('.form-section')).filter(
+  section => section.id !== "dashboard-section"
+);
+sections.length = 0;
+sections.push(...sectionElements);
+
+updateSections();
+});
+// ✅ Filtrage
+document.getElementById("btn-filtrer").addEventListener("click", () => {
+  const dateFiltre = document.getElementById("filtre-date").value;
+  const serviceFiltre = document.getElementById("filtre-service").value;
+
+  const dashboardList = document.getElementById("dashboard-list");
+  firebase.database().ref('fiches').orderByKey().limitToLast(20).once('value')
+
+    .then(snapshot => {
+      const fiches = snapshot.val();
+      dashboardList.innerHTML = '';
+
+      if (!fiches) {
+        dashboardList.innerHTML = '<p>Aucune fiche trouvée.</p>';
+        return;
+      }
+
+      Object.entries(fiches).forEach(([id, fiche]) => {
+        const matchDate = !dateFiltre || fiche.date === dateFiltre;
+        const matchService = !serviceFiltre || fiche.reception?.service === serviceFiltre;
+
+        if (matchDate && matchService) {
+          const ficheDiv = document.createElement("div");
+          ficheDiv.style.border = '1px solid #ccc';
+          ficheDiv.style.padding = '10px';
+          ficheDiv.style.marginBottom = '10px';
+          ficheDiv.style.borderRadius = '6px';
+          ficheDiv.style.backgroundColor = document.body.classList.contains('dark-mode') ? '#1e1e1e' : '#f9f9f9';
+
+          ficheDiv.innerHTML = `
+            <p><strong>Date:</strong> ${fiche.date || '---'}</p>
+            <p><strong>Service:</strong> ${fiche.reception?.service || '---'}</p>
+            <p><strong>Transport:</strong> ${fiche.reception?.transport || '---'}</p>
+            <p><strong>Observation réception:</strong> ${fiche.reception?.observations || '---'}</p>
+            <p><strong>Produit nettoyage:</strong> ${fiche.nettoyage?.product || '---'}</p>
+            <p><strong>Opérateur:</strong> ${fiche.validation?.operatorName || '---'}</p>
+            <p><strong>Phase:</strong> ${fiche.validation?.phase || fiche.phase || '---'}</p>
+            <button class="btn btn-primary" onclick="modifierFiche('${id}')">✏️ Modifier</button>
+            <button class="btn btn-submit" style="background-color:#e74c3c;" onclick="supprimerFiche('${id}')">🗑️ Supprimer</button>
+          `;
+
+          dashboardList.appendChild(ficheDiv);
+        }
+      });
+    });
+});
+
+// ✅ Export Excel
+document.getElementById("btn-export").addEventListener("click", () => {
+  showLoader(true);
+  firebase.database().ref("fiches").once("value")
+    .then(snapshot => {
+      const fiches = snapshot.val();
+      if (!fiches) {
+        showLoader(false);سس
+        alert("Aucune fiche à exporter.");
+        return;
+      }
+
+      const data = Object.values(fiches).map(fiche => ({
+  Date: fiche.date || "Non renseigné",
+  Service: fiche.reception?.service || "Non renseigné",
+  Transport: fiche.reception?.transport || "Non renseigné",
+  "Obs. réception": fiche.reception?.observations || "Non renseigné",
+  Produit: fiche.nettoyage?.product || "Non renseigné",
+  Température: fiche.nettoyage?.temperature || "Non renseigné",
+  Rinçage: fiche.nettoyage?.rinse || "Non renseigné",
+  Séchage: fiche.nettoyage?.drying || "Non renseigné",
+  Opérateur: fiche.validation?.operatorName || "Non renseigné",
+  Phase: fiche.validation?.phase || fiche.phase || "Non renseigné"
+}));
+
+
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Fiches");
+
+      XLSX.writeFile(wb, "fiches_sterilisation.xlsx");
+      showLoader(false);
+    });
+});
+
+// ✅ Déconnexion : Retour à la page d'accueil
+document.getElementById("btn-deconnexion").addEventListener("click", function () {
+  localStorage.removeItem("utilisateurConnecte"); // حذف الجلسة
+  document.getElementById("app-container").classList.add("hidden");
+  document.getElementById("welcome-page").classList.remove("hidden");
+});
+// ✅ Nouvelle fiche : réinitialiser le formulaire
+document.getElementById("btn-nouveau").addEventListener("click", () => {
+  const confirmation = confirm("⚠️ Voulez-vous vraiment créer une nouvelle fiche ?");
+  if (!confirmation) return;
+
+  localStorage.removeItem("ficheEnEdition");
+  resetForm(); // 🧹 مسح الحقول
+  document.getElementById("btn-retour").click(); // العودة للنموذج
+
+  showToast("🆕 Nouvelle fiche réinitialisée !");
+});
+
+
+
+function genererStatistiques(fiches) {
+  console.log("📊 Démarrage du rendu des statistiques...");
+
+  const services = {};
+  const phases = {};
+  const transports = {};
+  const produits = {};
+  const operateurs = {};
+
+  Object.values(fiches).forEach(fiche => {
+    const service = fiche.reception?.service || 'Inconnu';
+    const phase = fiche.validation?.phase || fiche.phase || 'Inconnue';
+    const transport = fiche.reception?.transport || 'Inconnu';
+    const produit = fiche.nettoyage?.product || 'Inconnu';
+    const operateur = fiche.validation?.operatorName || 'Inconnu';
+
+    services[service] = (services[service] || 0) + 1;
+    phases[phase] = (phases[phase] || 0) + 1;
+    transports[transport] = (transports[transport] || 0) + 1;
+    produits[produit] = (produits[produit] || 0) + 1;
+    operateurs[operateur] = (operateurs[operateur] || 0) + 1;
+  });
+
+  const chartConfigs = [
+    { id: 'serviceChart', label: 'Fiches par service', data: services, type: 'bar' },
+    { id: 'phaseChart', label: 'Fiches par phase', data: phases, type: 'pie' },
+    { id: 'transportChart', label: 'Fiches par transport', data: transports, type: 'bar' },
+    { id: 'produitChart', label: 'Produits utilisés', data: produits, type: 'doughnut' },
+    { id: 'operateurChart', label: 'Fiches par opérateur', data: operateurs, type: 'bar' },
+  ];
+
+  chartConfigs.forEach(config => {
+    const canvas = document.getElementById(config.id)?.getContext('2d');
+    if (!canvas) return; // تفادي الخطأ إذا ما كانش العنصر موجود
+
+    new Chart(canvas, {
+      type: config.type,
+      data: {
+        labels: Object.keys(config.data),
+        datasets: [{
+          label: config.label,
+          data: Object.values(config.data),
+          backgroundColor: ['#3498db', '#2ecc71', '#e74c3c', '#9b59b6', '#f39c12', '#1abc9c']
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: config.type !== 'bar' },
+          title: { display: true, text: config.label }
+        }
+      }
+    });
+  });
+}
+
+let operatorSignaturePad;
+let supervisorSignaturePad;
+
+document.addEventListener('DOMContentLoaded', function () {
+  // ✅ كود الوضع الليلي
+const toggleBtn = document.getElementById("toggle-theme");
+const body = document.body;
+
+// إذا كان الوضع الليلي مفعل مسبقًا
+if (localStorage.getItem("theme") === "dark") {
+  body.classList.add("dark-mode");
+}
+
+// التعامل مع الزر في الواجهة الرئيسية
+if (toggleBtn) {
+  toggleBtn.addEventListener("click", () => {
+    body.classList.toggle("dark-mode");
+    const isDark = body.classList.contains("dark-mode");
+    localStorage.setItem("theme", isDark ? "dark" : "light");
+  });
+}
+
+// التعامل مع الزر داخل القائمة الجانبية للهاتف
+const burgerThemeBtn = document.getElementById("burger-theme");
+if (burgerThemeBtn) {
+  burgerThemeBtn.addEventListener("click", () => {
+    toggleBtn?.click();
+  });
+}
+
+  const operatorCanvas = document.querySelectorAll('.signature-canvas')[0];
+  const supervisorCanvas = document.querySelectorAll('.signature-canvas')[1];
+
+  operatorSignaturePad = new SignaturePad(operatorCanvas);
+  supervisorSignaturePad = new SignaturePad(supervisorCanvas);
+  // ✅ استعادة المسودة عند تحميل الصفحة
+const draft = JSON.parse(localStorage.getItem("draftFiche"));
+if (draft) {
+  if (draft.date) document.getElementById('date').value = draft.date;
+  if (draft.arrivalTime) document.getElementById('arrival-time').value = draft.arrivalTime;
+  if (draft.service) document.getElementById('service').value = draft.service;
+  if (draft.transport) document.getElementById('transport').value = draft.transport;
+  if (draft.observations) document.getElementById('reception-observations').value = draft.observations;
+  console.log("📝 Brouillon chargé");
+}
+
+});
+
+function clearSignature(role) {
+  if (role === 'operator') operatorSignaturePad.clear();
+  if (role === 'supervisor') supervisorSignaturePad.clear();
+}
+function resetForm() {
+  // 🗓 التاريخ
+  document.getElementById('date').value = '';
+
+  // ✅ Réception
+  document.getElementById('arrival-time').value = '';
+  document.getElementById('service').value = '';
+  document.getElementById('transport').value = '';
+  document.getElementById('reception-observations').value = '';
+  document.getElementById('risk-prion').checked = false;
+  document.getElementById('risk-other').checked = false;
+  document.querySelector('#risk-other').closest('.form-group').querySelector('input[type="text"]').value = '';
+  document.querySelector('#risk-other').closest('.form-group').querySelector('input[type="text"]').style.display = 'none';
+  document.getElementById('pretreatment-done').checked = true;
+
+  // ✅ Tri
+  document.getElementById('protocol-manual').checked = false;
+  document.getElementById('protocol-washer').checked = false;
+  document.getElementById('protocol-ultrasound').checked = false;
+  document.getElementById('quantity-complete').checked = true;
+  document.getElementById('quality-ok').checked = true;
+  document.getElementById('quality-damaged').checked = false;
+  document.getElementById('quality-rusty').checked = false;
+  document.getElementById('sorting-observations').value = '';
+
+  // ✅ Nettoyage
+  document.getElementById('cleaning-product').value = '';
+  document.getElementById('temp-35-45').checked = true;
+  document.getElementById('temp-40-60').checked = false;
+  document.getElementById('temp-50-60').checked = false;
+  document.getElementById('rinse-yes').checked = true;
+  document.getElementById('rinse-no').checked = false;
+  document.getElementById('drying-auto').checked = true;
+  document.getElementById('drying-manual').checked = false;
+  document.getElementById('drying-no').checked = false;
+  document.getElementById('cleaner-name').value = '';
+  document.getElementById('cleaning-observations').value = '';
+
+  // ✅ Validation
+  document.getElementById('operator-name').value = '';
+  document.getElementById('supervisor-name').value = '';
+  document.getElementById('phase').value = 'Réception';
+  if (operatorSignaturePad) operatorSignaturePad.clear();
+  if (supervisorSignaturePad) supervisorSignaturePad.clear();
+
+  document.getElementById('date').value = new Date().toISOString().split('T')[0];
+
+}
+setInterval(() => {
+  const draft = {
+    date: document.getElementById('date')?.value,
+    arrivalTime: document.getElementById('arrival-time')?.value,
+    service: document.getElementById('service')?.value,
+    transport: document.getElementById('transport')?.value,
+    observations: document.getElementById('reception-observations')?.value
+  };
+
+  localStorage.setItem("draftFiche", JSON.stringify(draft));
+  console.log("📥 Brouillon sauvegardé");
+}, 60000); // كل 60 ثانية
+
+    </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- 🔄 Loader d’attente -->
+<div id="loader" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(255,255,255,0.8); z-index: 9999; justify-content: center; align-items: center;">
+    <div style="border: 4px solid #ccc; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite;"></div>
+  </div>
+  <style>
+  @keyframes spin {
+    0% { transform: rotate(0deg);}
+    100% { transform: rotate(360deg);}
+  }
+  .desktop-menu { display: flex; gap: 10px; }
+.mobile-menu { display: none; position: relative; }
+
+@media (max-width: 768px) {
+  .desktop-menu { display: none; }
+  .mobile-menu { display: block; }
+}
+
+  </style>
+  <script>
+    function showLoader(show = true) {
+      document.getElementById("loader").style.display = show ? "flex" : "none";
+    }
+  </script>
+<!-- 🪟 Modal personnalisé -->
+<div id="custom-modal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); display: flex; justify-content: center; align-items: center; z-index: 9999;">
+    <div style="background: white; padding: 20px; border-radius: 10px; max-width: 300px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+      <p id="modal-message" style="margin-bottom: 20px;"></p>
+      <button onclick="closeModal()" style="background-color: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">Fermer</button>
+    </div>
+  </div>
+  <script>
+    function showModal(message) {
+      document.getElementById("modal-message").textContent = message;
+      document.getElementById("custom-modal").classList.remove("hidden");
+    }
+    function closeModal() {
+      document.getElementById("custom-modal").classList.add("hidden");
+    }
+  
+  </script>
+  
+  
+  <script>
+  // ✅ Burger Menu Mobile
+    document.getElementById("burger-btn").addEventListener("click", () => {
+      document.getElementById("burger-dropdown").classList.toggle("hidden");
+    });
+    document.getElementById("burger-dashboard").addEventListener("click", () => {
+      document.getElementById("btn-dashboard").click();
+    });
+    document.getElementById("burger-nouveau").addEventListener("click", () => {
+      document.getElementById("btn-nouveau").click();
+    });
+    document.getElementById("burger-deconnexion").addEventListener("click", () => {
+      document.getElementById("btn-deconnexion").click();
+    });
+
+    function showToast(message, duration = 3000) {
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.style.display = "block";
+
+  setTimeout(() => {
+    toast.style.display = "none";
+  }, duration);
+}
+
+</script>
+<!-- ✅ Toast message -->
+<div id="toast" style="display: none; position: fixed; bottom: 20px; right: 20px; background-color: #2ecc71; color: white; padding: 12px 20px; border-radius: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-weight: 500; z-index: 9999;"></div>
+
+</body>
+</html>

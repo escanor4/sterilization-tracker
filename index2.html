@@ -622,9 +622,12 @@ body.dark-mode .btn-submit {
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
 <script>
   let operatorSignaturePad = null;
   let supervisorSignaturePad = null;
+  let stockageSignaturePad = null;
 </script>
 
 <script>
@@ -778,9 +781,14 @@ dbRef.once("value").then((snapshot) => {
                 <div class="step-label">Nettoyage</div>
               </div>
               <div class="step" data-index="3">
-                <div class="step-number">4</div>
-                <div class="step-label">Validation</div>
-              </div>
+  <div class="step-number">4</div>
+  <div class="step-label">Stockage</div>
+</div>
+<div class="step" data-index="4">
+  <div class="step-number">5</div>
+  <div class="step-label">Validation</div>
+</div>
+
               
             </div>
 
@@ -814,7 +822,20 @@ dbRef.once("value").then((snapshot) => {
                                 <option value="autre">Autre</option>
                             </select>
                         </div>
-                        
+                        <div class="form-group">
+                          <label for="type-boite">Type de boîte</label>
+                          <select id="type-boite" class="form-control">
+                          <option value="">Sélectionner...</option>
+                          <option value="Boîte à appendicectomie">Boîte à appendicectomie</option>
+                          <option value="Boîte de chirurgie viscérale">Boîte de chirurgie viscérale</option>
+                          <option value="Boîte de chirurgie générale">Boîte de chirurgie générale</option>
+                          <option value="Boîte d’urgence">Boîte d’urgence</option>
+                          <option value="Boîte de laparotomie">Boîte de laparotomie</option>
+                          <option value="Boîte de suture">Boîte de suture</option>
+                          <option value="Boîte de gynécologie">Boîte de gynécologie</option>
+                          <option value="Boîte d’exploration abdominale">Boîte d’exploration abdominale</option>
+                        </select>
+                  </div>
                         <div class="form-group">
                             <label for="transport">Type de transport</label>
                             <select id="transport" class="form-control">
@@ -826,6 +847,8 @@ dbRef.once("value").then((snapshot) => {
                                 <option value="autre">Autre</option>
                             </select>
                         </div>
+                      
+
                         
                         <div class="form-group">
                             <label>Risque particulier</label>
@@ -1020,8 +1043,66 @@ dbRef.once("value").then((snapshot) => {
                     <button class="nav-button next-button">Suivant</button>
                 </div>
             </div>
-            
-            <!-- Section 4: Validation -->
+            <!-- Section 4: Stockage et Distribution -->
+<div class="form-section" id="section-stockage">
+  <div class="section">
+    <div class="section-header">4. Stockage et Distribution</div>
+    <div class="section-content">
+
+      <div class="form-group">
+        <label for="agent-stockage">Nom de l'agent responsable</label>
+        <input type="text" id="agent-stockage" class="form-control" placeholder="Nom complet">
+      </div>
+
+      <div class="form-group">
+        <label for="logiciel">Logiciel utilisé</label>
+        <select id="logiciel" class="form-control">
+          <option value="">Sélectionner...</option>
+          <option value="STERIGEST">STERIGEST</option>
+          <option value="OPERA">OPERA</option>
+          <option value="HOSPILOG">HOSPILOG</option>
+          <option value="AUTRE">Autre</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="quantite-stockee">Quantité stockée</label>
+        <input type="text" id="quantite-stockee" class="form-control" placeholder="Ex: 25 unités">
+      </div>
+
+      <div class="form-group">
+        <label for="date-stockage">Date de stockage</label>
+        <input type="date" id="date-stockage" class="form-control">
+      </div>
+
+      <div class="form-group">
+        <label for="date-distribution">Date de distribution</label>
+        <input type="date" id="date-distribution" class="form-control">
+      </div>
+
+      <div class="form-group">
+        <label for="agent-distribution">Nom de l'agent distributeur</label>
+        <input type="text" id="agent-distribution" class="form-control" placeholder="Nom complet">
+      </div>
+      <div class="form-group">
+  <label>Signature de l'agent distributeur</label>
+  <div class="signature-area">
+    <canvas id="signature-stockage" width="300" height="100" style="background:white; border-radius:4px;"></canvas>
+  </div>
+  <button class="btn" type="button" onclick="clearSignature('stockage')">Effacer</button>
+</div>
+
+
+    </div>
+  </div>
+
+  <div class="navigation-buttons">
+    <button class="nav-button prev-button">Précédent</button>
+    <button class="nav-button next-button">Suivant</button>
+  </div>
+</div>
+
+            <!-- Section 5: Validation -->
             <div class="form-section" id="section-validation">
                 <div class="section">
                     <div class="section-header">4. Validation</div>
@@ -1183,6 +1264,13 @@ setTimeout(() => {
     supervisorSignaturePad = new SignaturePad(canvases[1]);
   }
 }, 500); // ننتظر نصف ثانية حتى تظهر العناصر
+setTimeout(() => {
+  const stockageCanvas = document.getElementById('signature-stockage');
+  if (stockageCanvas) {
+    stockageSignaturePad = new SignaturePad(stockageCanvas);
+  }
+}, 600);
+
 
 
 
@@ -1304,14 +1392,25 @@ if (lastSaveTime && now - lastSaveTime < 60000) {
 
               // ✅ Vérification des champs obligatoires (hors observations)
 const champsObligatoires = [
-  "date",
-  "arrival-time",
-  "service",
-  "transport",
-  "cleaner-name",
-  "operator-name",
-  "supervisor-name"
+  "date",                   // تاريخ الفيشة
+  "arrival-time",           // ساعة الوصول
+  "service",                // الخدمة المرسلة
+  "transport",              // نوع النقل
+  "cleaner-name",           // اسم عامل التنظيف
+
+  // ⬇️ الحقول الجديدة الخاصة بـ stockage
+  "agent-stockage",         // اسم مسؤول التخزين
+  "logiciel",               // logiciel utilisé
+  "quantite-stockee",       // quantité stockée
+  "date-stockage",          // تاريخ التخزين
+  "date-distribution",      // تاريخ التوزيع
+  "agent-distribution",     // اسم الموزع
+
+  "operator-name",          // اسم عامل التوقيع
+  "supervisor-name"         // اسم المسؤول
 ];
+
+
 
 let champVide = false;
 
@@ -1325,8 +1424,12 @@ champsObligatoires.forEach(id => {
   }
 });
 
-// ✅ Vérification des signatures
-const signatureVide = operatorSignaturePad.isEmpty() || supervisorSignaturePad.isEmpty();
+// ✅ Vérification des signatures (incluant stockage)
+const signatureVide =
+  operatorSignaturePad?.isEmpty() ||
+  supervisorSignaturePad?.isEmpty() ||
+  stockageSignaturePad?.isEmpty();
+
 
 if (champVide) {
   showModal("⚠️ Veuillez remplir tous les champs obligatoires.");
@@ -1346,6 +1449,7 @@ if (signatureVide) {
     reception: {
       arrivalTime: document.getElementById('arrival-time')?.value || "",
       service: document.getElementById('service')?.value || "",
+      boite: document.getElementById('type-boite')?.value || "",
       transport: document.getElementById('transport')?.value || "",
       risks: {
         prion: document.getElementById('risk-prion')?.checked || false,
@@ -1385,6 +1489,16 @@ if (signatureVide) {
       cleanerName: document.getElementById('cleaner-name')?.value || "",
       observations: document.getElementById('cleaning-observations')?.value || ""
     },
+    stockage: {
+  agentResponsable: document.getElementById('agent-stockage')?.value || "",
+  logiciel: document.getElementById('logiciel')?.value || "",
+  quantite: document.getElementById('quantite-stockee')?.value || "",
+  dateStockage: document.getElementById('date-stockage')?.value || "",
+  dateDistribution: document.getElementById('date-distribution')?.value || "",
+  agentDistribution: document.getElementById('agent-distribution')?.value || "",
+  signatureDistribution: stockageSignaturePad?.isEmpty() ? "Non disponible" : stockageSignaturePad.toDataURL()
+
+},
 
     validation: {
       operatorName: document.getElementById('operator-name')?.value || "",
@@ -1490,14 +1604,25 @@ ficheDiv.style.color = isDarkMode ? '#f5f5f5' : '#2c3e50';
 ficheDiv.innerHTML = `
   <p><strong>Date:</strong> ${fiche.date || '---'}</p>
   <p><strong>Service:</strong> ${fiche.reception?.service || '---'}</p>
+  <p><strong>Type de boîte:</strong> ${fiche.reception?.boite || '---'}</p>
   <p><strong>Transport:</strong> ${fiche.reception?.transport || '---'}</p>
   <p><strong>Observation réception:</strong> ${fiche.reception?.observations || '---'}</p>
   <p><strong>Produit nettoyage:</strong> ${fiche.nettoyage?.product || '---'}</p>
   <p><strong>Opérateur:</strong> ${fiche.validation?.operatorName || '---'}</p>
   <p><strong>Phase:</strong> ${fiche.validation?.phase || fiche.phase || '---'}</p>
   ${fiche.photoUrl ? `<img src="${fiche.photoUrl}" style="max-width: 100px; max-height: 100px; border-radius: 6px; margin-top: 10px;">` : ''}
+  <p><strong>Responsable Stockage:</strong> ${fiche.stockage?.agentResponsable || '---'}</p>
+  <p><strong>Logiciel:</strong> ${fiche.stockage?.logiciel || '---'}</p>
+  <p><strong>Quantité:</strong> ${fiche.stockage?.quantite || '---'}</p>
+  <p><strong>Distributeur:</strong> ${fiche.stockage?.agentDistribution || '---'}</p>
+  <p><strong>Date Distribution:</strong> ${fiche.stockage?.dateDistribution || '---'}</p>
+  ${fiche.stockage?.signatureDistribution && fiche.stockage.signatureDistribution !== "Non disponible" 
+  ? `<img src="${fiche.stockage.signatureDistribution}" style="max-width: 100px; margin-top: 10px; border-radius: 6px;">`
+  : '<p><em>Signature distributeur non disponible</em></p>'}
+
   <button class="btn btn-primary" onclick="modifierFiche('${id}')">✏️ Modifier</button>
   <button class="btn btn-submit" style="background-color:#e74c3c;" onclick="supprimerFiche('${id}')">🗑️ Supprimer</button>
+
 `;
 
         dashboardList.appendChild(ficheDiv);
@@ -1702,16 +1827,22 @@ document.getElementById("btn-export").addEventListener("click", () => {
       }
 
       const data = Object.values(fiches).map(fiche => ({
-  Date: fiche.date || "Non renseigné",
-  Service: fiche.reception?.service || "Non renseigné",
-  Transport: fiche.reception?.transport || "Non renseigné",
-  "Obs. réception": fiche.reception?.observations || "Non renseigné",
-  Produit: fiche.nettoyage?.product || "Non renseigné",
-  Température: fiche.nettoyage?.temperature || "Non renseigné",
-  Rinçage: fiche.nettoyage?.rinse || "Non renseigné",
-  Séchage: fiche.nettoyage?.drying || "Non renseigné",
-  Opérateur: fiche.validation?.operatorName || "Non renseigné",
-  Phase: fiche.validation?.phase || fiche.phase || "Non renseigné"
+        Date: fiche.date || "Non renseigné",
+        Service: fiche.reception?.service || "Non renseigné",
+        Transport: fiche.reception?.transport || "Non renseigné",
+        "Obs. réception": fiche.reception?.observations || "Non renseigné",
+        Produit: fiche.nettoyage?.product || "Non renseigné",
+        Température: fiche.nettoyage?.temperature || "Non renseigné",
+        Rinçage: fiche.nettoyage?.rinse || "Non renseigné",
+        Séchage: fiche.nettoyage?.drying || "Non renseigné",
+        Opérateur: fiche.validation?.operatorName || "Non renseigné",
+        Phase: fiche.validation?.phase || fiche.phase || "Non renseigné",
+        ResponsableStockage: fiche.stockage?.agentResponsable || "Non renseigné",
+        Logiciel: fiche.stockage?.logiciel || "Non renseigné",
+        QuantitéStockée: fiche.stockage?.quantite || "Non renseigné",
+        Distributeur: fiche.stockage?.agentDistribution || "Non renseigné",
+        DateDistribution: fiche.stockage?.dateDistribution || "Non renseigné"
+
 }));
 
 
@@ -1810,6 +1941,8 @@ document.getElementById("fiches-mois").textContent =
   const transports = {};
   const produits = {};
   const operateurs = {};
+  const logiciels = {};
+
 
   Object.values(fiches).forEach(fiche => {
     const service = fiche.reception?.service || 'Inconnu';
@@ -1817,6 +1950,9 @@ document.getElementById("fiches-mois").textContent =
     const transport = fiche.reception?.transport || 'Inconnu';
     const produit = fiche.nettoyage?.product || 'Inconnu';
     const operateur = fiche.validation?.operatorName || 'Inconnu';
+    const logiciel = fiche.stockage?.logiciel || 'Non renseigné';
+    logiciels[logiciel] = (logiciels[logiciel] || 0) + 1;
+
 
     services[service] = (services[service] || 0) + 1;
     phases[phase] = (phases[phase] || 0) + 1;
@@ -1856,6 +1992,35 @@ document.getElementById("fiches-mois").textContent =
       }
     });
   });
+  // ✅ Dessiner le graphique des logiciels utilisés (Stockage)
+const ctxLogiciel = document.createElement("canvas");
+ctxLogiciel.id = "logicielChart";
+ctxLogiciel.style.maxHeight = "300px";
+ctxLogiciel.style.marginTop = "40px";
+document.getElementById("dashboard-charts").appendChild(ctxLogiciel);
+
+new Chart(ctxLogiciel, {
+  type: 'bar',
+  data: {
+    labels: Object.keys(logiciels),
+    datasets: [{
+      label: "Logiciels utilisés (Stockage)",
+      backgroundColor: "#9b59b6",
+      data: Object.values(logiciels)
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      title: {
+        display: true,
+        text: 'Répartition des logiciels de stockage'
+      }
+    }
+  }
+});
+
 }
 
 
@@ -2122,7 +2287,49 @@ window.addEventListener("beforeunload", function (e) {
         console.error(error);
       });
   });
+  
+
 </script>
+<script>
+  function exportToExcel() {
+    firebase.database().ref("fiches").once("value").then(snapshot => {
+      const fiches = snapshot.val();
+      if (!fiches) {
+        alert("Aucune fiche à exporter.");
+        return;
+      }
+
+      const data = Object.values(fiches).map(fiche => ({
+        Date: fiche.date || "Non renseigné",
+        Service: fiche.reception?.service || "Non renseigné",
+        "Type de boîte": fiche.reception?.boite || "Non renseigné",
+        Transport: fiche.reception?.transport || "Non renseigné",
+        "Obs. réception": fiche.reception?.observations || "Non renseigné",
+        Produit: fiche.nettoyage?.product || "Non renseigné",
+        Température: fiche.nettoyage?.temperature || "Non renseigné",
+        Rinçage: fiche.nettoyage?.rinse || "Non renseigné",
+        Séchage: fiche.nettoyage?.drying || "Non renseigné",
+        Opérateur: fiche.validation?.operatorName || "Non renseigné",
+        Phase: fiche.validation?.phase || fiche.phase || "Non renseigné",
+        ResponsableStockage: fiche.stockage?.agentResponsable || "Non renseigné",
+        Logiciel: fiche.stockage?.logiciel || "Non renseigné",
+        QuantitéStockée: fiche.stockage?.quantite || "Non renseigné",
+        Distributeur: fiche.stockage?.agentDistribution || "Non renseigné",
+        DateDistribution: fiche.stockage?.dateDistribution || "Non renseigné"
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Fiches");
+
+      XLSX.writeFile(wb, "fiches_sterilisation.xlsx");
+    });
+  }
+
+  // ✅ ربط الزر بالدالة
+  document.getElementById("btn-export")?.addEventListener("click", exportToExcel);
+</script>
+
 
 </body>
 </html>

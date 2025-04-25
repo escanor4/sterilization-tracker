@@ -8,6 +8,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IFMSASO(OS201) - Traçabilité en Stérilisation</title>
     <style>
+      #loading-indicator {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #3498db;
+  display: none;
+}
+
+#loading-indicator.hidden {
+  display: none !important;
+}
+
       .stats-box {
   margin-bottom: 20px;
   padding: 12px;
@@ -658,11 +673,21 @@ body.dark-mode .btn-submit {
       loginBtn.addEventListener("click", function () {
         const id = document.getElementById("username").value;
         const mdp = document.getElementById("password").value;
+
+        // إضافة console.log للتحقق من القيم المدخلة
+  console.log("Identifiant:", id); // طباعة المعرف المدخل
+  console.log("Mot de passe:", mdp); // طباعة كلمة المرور المدخلة
   
         const dbRef = firebase.database().ref("utilisateurs/" + id);
+
+        
+  // تحقق من الاتصال بـ Firebase
+  console.log("Firebase Reference:", dbRef);
+
 dbRef.once("value").then((snapshot) => {
   if (snapshot.exists()) {
     const motdepasse = snapshot.val().motdepasse;
+    console.log("Mot de passe en base de données:", motdepasse);
     if (motdepasse === mdp) {
       document.getElementById("message").innerText = "Connexion réussie !";
       document.getElementById("welcome-page").classList.add("hidden");
@@ -675,6 +700,7 @@ dbRef.once("value").then((snapshot) => {
     document.getElementById("message").innerText = "Identifiant introuvable !";
   }
 }).catch((error) => {
+  console.error("Erreur:", error);
   document.getElementById("message").innerText = "Erreur: " + error.message;
 });
 
@@ -700,6 +726,8 @@ dbRef.once("value").then((snapshot) => {
 
 </head>
 <body>
+    <div id="loading-indicator" class="hidden">Chargement...</div>
+
     <!-- Page d'accueil -->
     <div class="welcome-page" id="welcome-page">
         <div class="logo-container">
@@ -1105,7 +1133,7 @@ dbRef.once("value").then((snapshot) => {
             <!-- Section 5: Validation -->
             <div class="form-section" id="section-validation">
                 <div class="section">
-                    <div class="section-header">4. Validation</div>
+                    <div class="section-header">5. Validation</div>
                     <div class="section-content">
                         <div class="form-group">
                             <label for="operator-name">Nom de l'opérateur</label>
@@ -1217,6 +1245,49 @@ dbRef.once("value").then((snapshot) => {
     </div>
 
     <script>
+      // عند بدء تحميل البيانات من Firebase
+function showLoader(isVisible) {
+  const loader = document.getElementById("loading-indicator");
+  if (isVisible) {
+    loader.classList.remove("hidden");
+  } else {
+    loader.classList.add("hidden");
+  }
+}
+
+document.getElementById('btn-dashboard').addEventListener('click', () => {
+  const dashboardList = document.getElementById('dashboard-list');
+  dashboardList.innerHTML = '<p>Chargement...</p>';
+  showLoader(true); // إظهار مؤشر التحميل
+
+  firebase.database().ref('fiches').limitToLast(20).once('value')
+    .then(snapshot => {
+      const fiches = snapshot.val();
+      dashboardList.innerHTML = ''; // تنظيف القائمة بعد التحميل
+      if (!fiches) {
+        dashboardList.innerHTML = '<p>Aucune fiche trouvée.</p>';
+      } else {
+        // معالجة البيانات هنا
+        Object.entries(fiches).forEach(([id, fiche]) => {
+          const ficheDiv = document.createElement("div");
+          ficheDiv.innerHTML = `
+            <p><strong>Date:</strong> ${fiche.date || '---'}</p>
+            <p><strong>Service:</strong> ${fiche.reception?.service || '---'}</p>
+            <!-- إضافة المزيد من المعلومات هنا -->
+          `;
+          dashboardList.appendChild(ficheDiv);
+        });
+      }
+      showLoader(false); // إخفاء مؤشر التحميل بعد اكتمال التحميل
+    })
+    .catch(error => {
+      console.error('Erreur lors du chargement:', error);
+      dashboardList.innerHTML = '<p style="color:red;">Erreur lors du chargement des fiches.</p>';
+      showLoader(false); // إخفاء المؤشر في حال حدوث خطأ
+    });
+});
+
+
         
         document.addEventListener('DOMContentLoaded', function() {
             const utilisateurConnecte = localStorage.getItem("utilisateurConnecte");
@@ -1282,31 +1353,36 @@ setTimeout(() => {
             const welcomePage = document.getElementById('welcome-page');
             const appContainer = document.getElementById('app-container');
             
-            loginBtn.addEventListener('click', function () {
-  const identifiant = document.getElementById('username').value;
-  const motdepasse = document.getElementById('password').value;
+            loginBtn.addEventListener("click", function () {
+  const identifiant = document.getElementById("username").value;
+  const motdepasse = document.getElementById("password").value;
 
   const dbRef = firebase.database().ref("utilisateurs/" + identifiant);
 
-  dbRef.once('value').then((snapshot) => {
-    if (snapshot.exists()) {
-      const data = snapshot.val();
-      if (data.motdepasse === motdepasse) {
-        // Connexion réussie
-        localStorage.setItem("utilisateurConnecte", identifiant); // 🔐 Enregistrer la session
-        welcomePage.classList.add("hidden");
-        appContainer.classList.remove("hidden");
+  dbRef.once("value")
+    .then((snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        console.log("Data fetched from Firebase:", data);  // طباعة البيانات المسترجعة
+        
+        if (data.motdepasse === motdepasse) {
+          // Connexion réussie
+          localStorage.setItem("utilisateurConnecte", identifiant); // 🔐 Enregistrer la session
+          welcomePage.classList.add("hidden");
+          appContainer.classList.remove("hidden");
+        } else {
+          document.getElementById("message").innerText = "Mot de passe incorrect !";
+        }
       } else {
-        showModal("❌ Mot de passe incorrect !");
+        alert("Identifiant introuvable !");
       }
-    } else {
-      alert("Identifiant introuvable !");
-    }
-  }).catch((error) => {
-    console.error("Erreur lors de la connexion:", error);
-    alert("Erreur lors de la connexion.");
-  });
+    })
+    .catch((error) => {
+      console.error("Erreur lors de la connexion:", error);
+      document.getElementById("message").innerText = "Erreur: " + error.message;
+    });
 });
+
 
 
             
@@ -1573,6 +1649,8 @@ document.getElementById('btn-dashboard').addEventListener('click', () => {
 
 
   // ✅ تحميل البيانات من Firebase
+
+
   firebase.database().ref('fiches').limitToLast(20).once('value')
     .then(snapshot => {
       const fiches = snapshot.val();
@@ -1641,6 +1719,50 @@ ficheDiv.innerHTML = `
     
 
 });
+document.getElementById('btn-dashboard').addEventListener('click', () => {
+  const dashboardList = document.getElementById('dashboard-list');
+  dashboardList.innerHTML = '<p>Chargement...</p>';
+  showLoader(true); // إظهار مؤشر التحميل
+
+  let lastKey = null; // لتخزين المفتاح الأخير المحمّل
+
+  // استعلام Firebase لتحميل البيانات بشكل جزئي
+  let query = firebase.database().ref('fiches').limitToLast(20); // تحميل آخر 20 سجلًا
+
+  // إذا كان لدينا مفتاح آخر (أي أننا قمنا بتحميل بيانات سابقة)
+  if (lastKey) {
+    query = query.startAt(lastKey);  // البدء من المفتاح الأخير
+  }
+
+  query.once('value')
+    .then(snapshot => {
+      const fiches = snapshot.val();
+      dashboardList.innerHTML = ''; // تنظيف القائمة بعد التحميل
+      if (!fiches) {
+        dashboardList.innerHTML = '<p>Aucune fiche trouvée.</p>';
+      } else {
+        // معالجة البيانات هنا
+        Object.entries(fiches).forEach(([id, fiche]) => {
+          const ficheDiv = document.createElement("div");
+          ficheDiv.innerHTML = `
+            <p><strong>Date:</strong> ${fiche.date || '---'}</p>
+            <p><strong>Service:</strong> ${fiche.reception?.service || '---'}</p>
+            <!-- إضافة المزيد من المعلومات هنا -->
+          `;
+          dashboardList.appendChild(ficheDiv);
+          lastKey = id; // تحديث المفتاح الأخير
+        });
+      }
+      showLoader(false);  // إخفاء مؤشر التحميل
+    })
+    .catch(error => {
+      console.error('Erreur lors du chargement:', error);
+      dashboardList.innerHTML = '<p style="color:red;">Erreur lors du chargement des fiches.</p>';
+      showLoader(false);  // إخفاء المؤشر في حال حدوث خطأ
+    });
+});
+
+
 
 function supprimerFiche(id) {
   const confirmation = confirm("⚠️ Êtes-vous sûr de vouloir supprimer cette fiche ?");
@@ -1769,6 +1891,60 @@ document.getElementById('btn-retour').addEventListener('click', () => {
 
 // ✅ Filtrage
 document.getElementById("btn-filtrer").addEventListener("click", () => {
+  let lastKey = null;  // لتخزين المفتاح الأخير الذي تم تحميله
+
+document.getElementById("btn-filtrer").addEventListener("click", () => {
+  const dateFiltre = document.getElementById("filtre-date").value;
+  const serviceFiltre = document.getElementById("filtre-service").value;
+
+  const dashboardList = document.getElementById("dashboard-list");
+  dashboardList.innerHTML = '<p>Chargement...</p>';
+  showLoader(true);
+
+  let query = firebase.database().ref('fiches').limitToLast(20);  // تحميل آخر 20 سجلًا
+
+  // إذا كان لدينا تاريخ فلترة
+  if (dateFiltre) {
+    query = query.orderByChild('date').equalTo(dateFiltre);  // تصفية البيانات حسب التاريخ
+  }
+
+  // إذا كان لدينا فلترة للخدمة
+  if (serviceFiltre) {
+    query = query.orderByChild('reception/service').equalTo(serviceFiltre);  // تصفية البيانات حسب الخدمة
+  }
+
+  // إذا كان لدينا مفتاح آخر (أي أننا قمنا بتحميل بيانات سابقة)
+  if (lastKey) {
+    query = query.startAt(lastKey);  // البدء من المفتاح الأخير
+  }
+
+  query.once('value')
+    .then(snapshot => {
+      const fiches = snapshot.val();
+      dashboardList.innerHTML = '';  // تنظيف القائمة بعد التحميل
+      if (!fiches) {
+        dashboardList.innerHTML = '<p>Aucune fiche trouvée.</p>';
+      } else {
+        Object.entries(fiches).forEach(([id, fiche]) => {
+          const ficheDiv = document.createElement("div");
+          ficheDiv.innerHTML = `
+            <p><strong>Date:</strong> ${fiche.date || '---'}</p>
+            <p><strong>Service:</strong> ${fiche.reception?.service || '---'}</p>
+            <!-- إضافة المزيد من المعلومات هنا -->
+          `;
+          dashboardList.appendChild(ficheDiv);
+          lastKey = id;  // تحديث المفتاح الأخير
+        });
+      }
+      showLoader(false);  // إخفاء مؤشر التحميل
+    })
+    .catch(error => {
+      console.error('Erreur lors du chargement:', error);
+      dashboardList.innerHTML = '<p style="color:red;">Erreur lors du chargement des fiches.</p>';
+      showLoader(false);  // إخفاء المؤشر في حال حدوث خطأ
+    });
+});
+
   const dateFiltre = document.getElementById("filtre-date").value;
   const serviceFiltre = document.getElementById("filtre-service").value;
 
@@ -2090,6 +2266,57 @@ setInterval(() => {
   localStorage.setItem("draftFiche", JSON.stringify(draft));
   console.log("📥 Brouillon sauvegardé");
 }, 60000); // كل 60 ثانية
+
+document.getElementById("btn-filtrer").addEventListener("click", () => {
+  const dateFiltre = document.getElementById("filtre-date").value;  // الحصول على التاريخ من المدخل
+  const serviceFiltre = document.getElementById("filtre-service").value;  // الحصول على الخدمة المختارة
+  
+  const dashboardList = document.getElementById("dashboard-list");
+  dashboardList.innerHTML = '<p>Chargement...</p>'; // إظهار مؤشر التحميل
+  showLoader(true);
+
+  // استعلام Firebase مع فلترة التاريخ والخدمة
+  let query = firebase.database().ref('fiches').orderByChild('date');
+  
+  if (dateFiltre) {
+    query = query.equalTo(dateFiltre);  // تصفية البيانات حسب التاريخ
+  }
+
+  if (serviceFiltre) {
+    query = query.equalTo(serviceFiltre, 'reception/service');  // تصفية البيانات حسب الخدمة
+  }
+
+  query.once('value')
+    .then(snapshot => {
+      const fiches = snapshot.val();
+      dashboardList.innerHTML = '';
+
+      if (!fiches) {
+        dashboardList.innerHTML = '<p>Aucune fiche trouvée.</p>';
+        showLoader(false);  // إخفاء مؤشر التحميل بعد الانتهاء
+        return;
+      }
+
+      Object.entries(fiches).forEach(([id, fiche]) => {
+        const ficheDiv = document.createElement("div");
+        ficheDiv.innerHTML = `
+          <p><strong>Date:</strong> ${fiche.date || '---'}</p>
+          <p><strong>Service:</strong> ${fiche.reception?.service || '---'}</p>
+          <p><strong>Type de boîte:</strong> ${fiche.reception?.boite || '---'}</p>
+          <p><strong>Transport:</strong> ${fiche.reception?.transport || '---'}</p>
+          <p><strong>Observation réception:</strong> ${fiche.reception?.observations || '---'}</p>
+        `;
+        dashboardList.appendChild(ficheDiv);
+      });
+      showLoader(false);
+    })
+    .catch(error => {
+      console.error('Erreur lors du chargement:', error);
+      dashboardList.innerHTML = '<p style="color:red;">Erreur lors du chargement des fiches.</p>';
+      showLoader(false);
+    });
+});
+
 
     </script>
 
